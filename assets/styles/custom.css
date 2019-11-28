@@ -1,0 +1,25 @@
+.musicJumbotron{
+    /* Hit Unsplash's Source API for a random background image, using the keyword 'music' */
+    background-image: url("https://source.unsplash.com/featured/?music");
+    background-size: cover;}
+
+.jumboHeading{
+    font-size: 3rem;
+    font-weight: bolder;
+        /* Set a white border around the dark text so it's easier to read on different backgrounds */
+        text-shadow:    -4px -4px 0 #FFF,  
+                         4px -4px 0 #FFF,
+                        -4px  4px 0 #FFF,
+                         4px  4px 0 #FFF;
+}
+
+.jumboTagline{
+    font-size: 2rem;
+    font-weight: bold;
+        /* Set a white border around the dark text so it's easier to read on different backgrounds */
+        text-shadow:    -2px -2px 0 #FFF,  
+                         2px -2px 0 #FFF,
+                        -2px  2px 0 #FFF,
+                         2px  2px 0 #FFF;
+}
+
