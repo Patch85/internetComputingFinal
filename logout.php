@@ -1,22 +1,11 @@
 <?php
-    // Start a session
+    // start or resume a session
     session_start();
 
-    // Set initial variables
-    $dsn = 'mysql:host=localhost;dbname=music';
-    // musicman has global privileges for the music database
-    // make sure to create and use a more limited user for customer access
-    $dbUsername = 'musicman';
-    $dbPassword = 'bQC_2AFWpq46M4N';
-
-    //  Attempt to connect to the database
-    try {
-        $db = new PDO($dsn, $dbUsername, $dbPassword);
-    } catch (PDOException $e) {
-        $error_message = $e->getMessage();
-        echo " <p>An error occurred while connecting to the database: $error_message</p>";
-        die();
-    }
+    // Remove all session variables
+    session_unset();
+    // Destroy the session
+    session_destroy();    
 ?>
 
 <!DOCTYPE html>
@@ -53,8 +42,8 @@
                     <a class="nav-link" href="index.php">Home</a>
                 </li>
 
-                <li class="nav-item active">
-                    <a class="nav-link" href="products.php">Products <span class="sr-only">(current)</span></a>
+                <li class="nav-item">
+                    <a class="nav-link" href="products.php">Products</a>
                 </li>
 
                 <li class="nav-item">
@@ -63,6 +52,10 @@
 
                 <li class="nav-item">
                     <a class="nav-link" href="login.php">Log In</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" href="logout.php">Log Out<span class="sr-only">(current)</span></a>
                 </li>
             </ul>
 
@@ -76,40 +69,13 @@
     <!-- Jumbotron/Hero element : Features a random background image and a tagline for the company -->
     <div class="jumbotron jumbotron-fluid musicJumbotron">
         <div class="container">
-            <h1 class="jumboHeading">Products</h1>
+            <h1 class="jumboHeading">Logged Out</h1>
+            <h2 class="jumboTagline">Thanks for shopping with DDM!</h2>
         </div>
     </div>
 
-    <div class="container-fluid">
-        <div class="row">
-            <?php // Query the DB for all products
-                $query = ('SELECT * FROM products ORDER BY category');
-                $statement = $db->prepare($query);
-                $statement -> execute();
-                $product = $statement->fetch(); // get the first row
-                while ($product != null) { ?>
-            <!-- Create a card for each product -->
-            <div class="col-sm-6 col-md-4 col-lg-3 col-xlg-2">
-                <div class="card m-2">
-                    <img src="<?php echo $product['imagePath']; ?>"
-                        class="card-img-top" alt="...">
-
-                    <div class="card-body">
-                        <h5 class="card-title"><?php echo $product['productName']; ?>
-                        </h5>
-                        <p class="card-text"><?php echo $product['description']; ?>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <?php $product = $statement->fetch(); // get the next row
-                }
-            ?>
-        </div>
-    </div>
-
-    <!-- Bootstrap JavaScript Bundle CDN -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        <!-- Bootstrap JavaScript Bundle CDN -->
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
