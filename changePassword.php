@@ -29,6 +29,30 @@
 
         // Retrieve the hashed password from the database for comparison
         $query = "SELECT password FROM users WHERE accountNUmber = :accountNumber";
+        $statement = $db->prepare($query);
+        $statement->bindValue(":accountNumber", $_SESSION['acctNum']);
+        $statement->execute();
+        $results = $statement->fetch();
+        $statement->closeCursor();
+
+        // Declare a variable to store the hashed password from the database
+        $hashedPassword = $results['password'];
+
+        // Compare the provided 'current password' matches the hashed password in the database
+        $validPW = password_verify($currentPassword, $hashedPassword);
+
+        // If the user provided a valid current password, update the DB with the new password they provided
+        if ($validPW) {
+            //Encrypt the password with a randomly generated salt and Blowfish
+            $newPasswword = password_hash($newPasswword, PASSWORD_BCRYPT);
+
+            // Update the database with the user's new encrypted password
+            $query = "UPDATE users
+                        SET password = :password
+                        WHERE accountNumber = :accountNumber";
+            $statement = $db->prepare($query);
+            $statement->bindValue(":password", $newPasswword);
+            $statement->bindValue(":accountNumber", $_SESSION['acctNum']);
             $statement->execute();
             $statement->closeCursor();
 

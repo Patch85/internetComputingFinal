@@ -40,13 +40,16 @@
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+
         <!-- DDM Brand -->
         <a class="navbar-brand" href="index.php">DDM, Inc.</a>
+
         <!-- Use Bootstrap's Toggler to allow for expanding from and collapsing to a hamburger menu -->
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navLinks"
             aria-controls="navLinks" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
+
         <!-- Provide Nav links in a List  -->
         <div class="collapse navbar-collapse" id="navLinks">
             <ul class="navbar-nav mr-auto">
@@ -72,29 +75,29 @@
 
                         <div class="dropdown-divider"></div>
 
-                        <a class="dropdown-item" href="customerProfile.php">View/Update Profile<</a> <div
-                                class="dropdown-divider">
+                        <a class="dropdown-item" href="customerProfile.php">View/Update Profile</a>
+
+                        <div class="dropdown-divider"></div>
+
+                        <a class="dropdown-item " href="changePassword.php">Change Password</a>
+
+                        <div class="dropdown-divider"></div>
+
+                        <a class="dropdown-item  disabled" href="#">Order History</a>
+
+                        <div class="dropdown-divider"></div>
+
+                        <a class="dropdown-item" href="logout.php">Log Out</a>
                     </div>
+                </li>
+            </ul>
 
-                    <a class="dropdown-item " href="changePassword.php">Change Password</a>
-
-                    <div class="dropdown-divider"></div>
-
-                    <a class="dropdown-item  disabled" href="#">Order History</a>
-
-                    <div class="dropdown-divider"></div>
-
-                    <a class="dropdown-item" href="logout.php">Log Out</a>
-        </div>
-        </li>
-        </ul>
-
-        <!-- Allow searching for products from the navbar -->
-        <form class="form-inline my-2 my-lg-0" action="searchResults.php" method="post">
-            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"
-                name="SearchQuery">
-            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-        </form>
+            <!-- Allow searching for products from the navbar -->
+            <form class="form-inline my-2 my-lg-0" action="searchResults.php" method="post">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"
+                    name="SearchQuery">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
         </div>
     </nav>
 
@@ -114,7 +117,7 @@
                 $product = $statement->fetch(); // get the first row
                 while ($product != null) { ?>
             <!-- Create a card for each product -->
-            <div class="col-sm-6 col-md-4 col-lg-3 col-xlg-2">
+            <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2">
                 <div class="card m-2">
                     <img src="<?php echo $product['imagePath']; ?>"
                         class="card-img-top" alt="...">
@@ -122,8 +125,14 @@
                     <div class="card-body">
                         <h5 class="card-title"><?php echo $product['productName']; ?>
                         </h5>
-                        <p class="card-text"><?php echo $product['description']; ?>
+
+                        <h6 class="card-subtitle text-muted mb-2">$<?php echo $product['price']; ?>
+                        </h6>
+
+                        <p class="card-text"><?php echo substr($product['description'], 0, 35) . "..."; ?>
                         </p>
+
+                        <a href="#" class="btn btn-success">Add to Cart</a>
                     </div>
                 </div>
             </div>

@@ -2,7 +2,7 @@
     // Start a session
     session_start();
 
-    // Set initial variables
+    // Set PDO variables
     $dsn = 'mysql:host=localhost;dbname=music';
     // musicman has global privileges for the music database
     // make sure to create and use a more limited user for customer access
@@ -17,6 +17,9 @@
         echo " <p>An error occurred while connecting to the database: $error_message</p>";
         die();
     }
+
+    // Declare an array to hold featured product data
+    $featuredProducts = array();
 
 ?>
 
@@ -61,9 +64,10 @@
                 </li>
 
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account</a>
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account</a>
 
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">                        
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item " href="login.php">Log In</a>
 
                         <div class="dropdown-divider"></div>
@@ -108,77 +112,47 @@
 
     <!-- Main Section of the page: Show 6 Featured Products as cards with brief descriptions -->
     <div class="container">
-        <h3 class="display-4">Featured Products</h2>
-            <!-- Use Bootsrap's Flexbox grid system to make 2 rows with up to 3 card elements each -->
-            <div class="row mt-3">
-                <div class="col-sm-6 col-md-4 col-lg-3 col-xlg-2">
-                    <div class="card m-2">
-                        <img src="assets\images\productImages\BrassFrenchhorn.jpg" class="card-img-top" alt="...">
+        <h3 class="display-4">Featured Products</h3>
 
-                        <div class="card-body">
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk
-                                of the card's content.</p>
+        <!-- Randomly select 6 products to feature -->
+        <div class="row">
+            <?php for ($i=0; $i < 6; $i++) {
+                // Generate a random number between 1 and 25
+                $productNumber = mt_rand(1, 25);
+
+                // Query the database and retrieve the data for the product with that productNumber
+                $query = "SELECT * FROM products WHERE productNumber = :productNumber";
+                $statement = $db->prepare($query);
+                $statement->bindValue(":productNumber", $productNumber);
+                $statement->execute();
+                $featuredProducts[] = $statement->fetch();
+                $statement->closeCursor();
+            } ?>
+
+            <?php
+                foreach ($featuredProducts as $product) { ?>
+                    <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2">
+                        <div class="card m-2">
+                            <img src="<?php echo $product['imagePath']; ?>"
+                                class="card-img-top" alt="...">
+
+                            <div class="card-body">
+                                <h5 class="card-title"><?php echo $product['productName']; ?>
+                                </h5>
+
+                                <h6 class="card-subtitle text-muted mb-2">$<?php echo $product['price']; ?>
+                                </h6>
+
+                                <p class="card-text"><?php echo substr($product['description'], 0, 35) . "..."; ?>
+                                </p>
+
+                                <a href="#" class="btn btn-success">Add to Cart</a>
+                            </div>
                         </div>
                     </div>
-                </div>
+            <?php } ?>           
 
-                <div class="col-sm-6 col-md-4 col-lg-3 col-xlg-2">
-                    <div class="card m-2">
-                        <img src="assets\images\productImages\BrassFrenchhorn.jpg" class="card-img-top" alt="...">
-
-                        <div class="card-body">
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk
-                                of the card's content.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-sm-6 col-md-4 col-lg-3 col-xlg-2">
-                    <div class="card m-2">
-                        <img src="assets\images\productImages\BrassFrenchhorn.jpg" class="card-img-top" alt="...">
-
-                        <div class="card-body">
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk
-                                of the card's content.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-sm-6 col-md-4 col-lg-3 col-xlg-2">
-                    <div class="card m-2">
-                        <img src="assets\images\productImages\BrassFrenchhorn.jpg" class="card-img-top" alt="...">
-
-                        <div class="card-body">
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk
-                                of the card's content.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-sm-6 col-md-4 col-lg-3 col-xlg-2">
-                    <div class="card m-2">
-                        <img src="assets\images\productImages\BrassFrenchhorn.jpg" class="card-img-top" alt="...">
-
-                        <div class="card-body">
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk
-                                of the card's content.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-sm-6 col-md-4 col-lg-3 col-xlg-2">
-                    <div class="card m-2">
-                        <img src="assets\images\productImages\BrassFrenchhorn.jpg" class="card-img-top" alt="...">
-
-                        <div class="card-body">
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk
-                                of the card's content.</p>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
+        </div>
     </div>
 
     <!-- Bootstrap JavaScript Bundle CDN -->
