@@ -18,55 +18,93 @@
         die();
     }
 
-    // If the user has submitted the form, try to insert the user into the database
-    if (isset($_POST['emailAddress'])) {
+    if (isset($_SESSION['userName']) && !isset($_POST['emailAddress'])) {
+        // User is logged in, but has not tried to update their profile yet
+        // Display the profile page.
+
+        // Retrieve user's data from database
+        $query = "SELECT * FROM users where accountNumber = :accountNumber";
+        $statement = $db->prepare($query);
+        $statement->bindValue(":accountNumber", $_SESSION['acctNum']);
+        $statement->execute();
+        $userProfile = $statement->fetch();
+        $statement->closeCursor();
+
+        // Assign data to simple variable names
+        $accountNumber = $userProfile['accountNumber'];
+        $emailAddress = $userProfile['emailAddress'];
+        $password = $userProfile['password'];
+        $firstName = $userProfile['firstName'];
+        $lastName = $userProfile['lastName'];
+        $phoneNumber = $userProfile['phoneNumber'];
+        $address1 = $userProfile['address1'];
+        $address2 = $userProfile['address2'];
+        $city = $userProfile['city'];
+        $state = $userProfile['state'];
+        $zip = $userProfile['zip'];
+    }else if (isset($_SESSION['userName']) && isset($_POST['emailAddress'])) {
+        // User is logged in and submitted the form to update their profile/account information
+
+        // Retrieve user's hashed password from database
+        $query = "SELECT password FROM users where accountNumber = :accountNumber";
+        $statement = $db->prepare($query);
+        $statement->bindValue(":accountNumber", $_SESSION['acctNum']);
+        $statement->execute();
+        $userProfile = $statement->fetch();
+        $statement->closeCursor();
+
+        // Assign the current password to a variable
+        $hashedPass = $userProfile['password'];
+
+        // Assign the form data to required variables
         $emailAddress = $_POST['emailAddress'];
         $password = $_POST['password'];
         $firstName = $_POST['firstName'];
         $lastName = $_POST['lastName'];
-        $userType = "customer"; // All newly registered users are automatically set to type: customer
         $phoneNumber = $_POST['phoneNumber'];
         $address1 = $_POST['address1'];
         $address2 = $_POST['address2'];
         $city = $_POST['city'];
         $state = $_POST['state'];
-        $zip = $_POST['zip'];
+        $zip = $_POST['zip'];  
 
-        //Encrypt the password with a randomly generated salt and Blowfish
-        $attempt = 0;
-        do {
-            $hashedPW = password_hash($password, PASSWORD_BCRYPT);
-           ++$attempt;
-        } while ($hashedPW == false && attempt < 3);
+        // Ensure that the old password the user provided is valid before updating
+        $validPassword = password_verify($password, $hashedPass);        
 
-        // If password encryption was successful, register the user
-        if ($hashedPW != false) {
-            // Attempt to add the new user
-            $query = "INSERT INTO users 
-                    (emailAddress, password, firstName, lastName, userType, phoneNumber, address1, address2, city, state, zip)
-                VALUES 
-                    (:emailAddress, :password, :firstName, :lastName, :userType, :phoneNumber, :address1, :address2, :city, :state, :zip)";
-
+        // If the user provided a valid 'old password' update their profile
+        if ($validPassword) {
+            $query = "UPDATE users
+                    SET emailAddress = :emailAddress,                      
+                        firstName = :firstName,
+                        lastName = :lastName,
+                        phoneNumber = :phoneNumber,
+                        address1 = :address1,
+                        address2 = :address2,
+                        city = :city,
+                        state = :state,
+                        zip = :zip
+                    WHERE accountNumber = :accountNumber";
             $statement = $db->prepare($query);
-
             $statement->bindValue(':emailAddress', $emailAddress);
-            $statement->bindValue(':password', $hashedPW);
             $statement->bindValue(':firstName', $firstName);
             $statement->bindValue(':lastName', $lastName);
-            $statement->bindValue(':userType', $userType);
             $statement->bindValue(':phoneNumber', $phoneNumber);
             $statement->bindValue(':address1', $address1);
             $statement->bindValue(':address2', $address2);
             $statement->bindValue(':city', $city);
             $statement->bindValue(':state', $state);
             $statement->bindValue(':zip', $zip);
-
             $statement->execute();
-
             $statement->closeCursor();
-        } else{ // If password encryption failed after 3 attempts, registration fails
-            echo "<p>There was an error during registration. Please try again.</p>";
+        }else{
+            // The password the user provided was incorrect
+            // Redirect to login page
+            header("Location: ./login.php");
+
         }
+    } else {
+        // User is not logged in, redirect to login page
+        header("Location: ./login.php");
     }
 ?>
 
@@ -84,9 +122,9 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
+
     <!-- Add the custom CSS on top of Bootstrap -->
     <link rel="stylesheet" href="assets\styles\custom.css">
-
 </head>
 
 <body>
@@ -114,15 +152,15 @@
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account</a>
 
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">                        
-                        <a class="dropdown-item" href="login.php">Log In</a>
+                        <a class="dropdown-item " href="login.php">Log In</a>
 
                         <div class="dropdown-divider"></div>
 
-                        <a class="dropdown-item active" href="register.php">Register<span class="sr-only">(current)</span></a>
+                        <a class="dropdown-item " href="register.php">Register</a>
 
                         <div class="dropdown-divider"></div>
 
-                        <a class="dropdown-item" href="customerProfile.php">View/Update Profile<</a>
+                        <a class="dropdown-item active" href="customerProfile.php">View/Update Profile<span class="sr-only">(current)</span></a>
 
                         <div class="dropdown-divider"></div>
 
@@ -134,7 +172,7 @@
 
                         <div class="dropdown-divider"></div>
 
-                        <a class="dropdown-item" href="logout.php">Log Out</a>
+                        <a class="dropdown-item " href="logout.php">Log Out</a>
                     </div>
                 </li>
             </ul>
@@ -147,74 +185,82 @@
             </form>
         </div>
     </nav>
+
     <!-- Jumbotron/Hero element : Features a random background image and a tagline for the company -->
     <div class="jumbotron jumbotron-fluid musicJumbotron">
         <div class="container">
-            <h1 class="jumboHeading">Registration</h1>
+            <h1 class="jumboHeading"><?php echo $_SESSION['userName']?>'s
+                Profile</h1>
         </div>
     </div>
 
     <div class="container">
-    <form class="col-md-6 m-auto" action="register.php" method="post">
+        <form class="col-md-6 m-auto" action="customerProfile.php" method="post" autocomplete="off">
             <div class="form-group">
                 <label for="emailAddress">Email Address</label>
                 <input type="email" name="emailAddress" id="emailAddress" class="form-control"
-                    placeholder="you@email.com" autofocus required>
+                    value="<?php echo $emailAddress; ?>" required>
             </div>
 
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" name="password" id="password" class="form-control" placeholder="password"
-                    required>
+                <input type="password" name="password" id="password" class="form-control"
+                    placeholder="Enter your password to process changes" required>
             </div>
 
             <div class="form-group">
                 <label for="lastName">First Name</label>
-                <input type="text" name="firstName" id="firstName" class="form-control" placeholder="Jane" required>
+                <input type="text" name="firstName" id="firstName" class="form-control"
+                    value="<?php echo $firstName; ?>" required>
             </div>
 
             <div class="form-group">
                 <label for="lastName">Last Name</label>
-                <input type="text" name="lastName" id="lastName" class="form-control" placeholder="Doe" required>
+                <input type="text" name="lastName" id="lastName" class="form-control"
+                    value="<?php echo $lastName; ?>" required>
             </div>
 
             <div class="form-group">
                 <label for="phoneNumber">Phone Number</label>
-                <input type="tel" name="phoneNumber" id="phoneNumber" class="form-control" placeholder="(555) 123-4567"
-                    required>
+                <input type="tel" name="phoneNumber" id="phoneNumber" class="form-control"
+                    value="<?php echo $phoneNumber; ?>" required>
             </div>
 
             <div class="form-group">
                 <label for="address1">Street Address</label>
-                <input type="text" name="address1" id="address1" class="form-control" placeholder="123 Main Street"
-                    required>
+                <input type="text" name="address1" id="address1" class="form-control"
+                    value="<?php echo $address1; ?>" required>
             </div>
 
             <div class="form-group">
                 <label for="address2">Unit/Apt Number</label>
-                <input type="text" name="address2" id="address2" class="form-control" placeholder="Unit #4A">
+                <input type="text" name="address2" id="address2" class="form-control" placeholder="Unit #4A"
+                    value="<?php echo $address2; ?>">
             </div>
 
             <div class="form-group">
                 <label for="city">City</label>
-                <input type="text" name="city" id="city" class="form-control" placeholder="Your Town" required>
+                <input type="text" name="city" id="city" class="form-control"
+                    value="<?php echo $city; ?>" required>
             </div>
 
             <div class="form-group">
                 <label for="state">State</label>
-                <input type="text" name="state" id="state" class="form-control" placeholder="Your State" required>
+                <input type="text" name="state" id="state" class="form-control"
+                    value="<?php echo $state; ?>" required>
             </div>
 
             <div class="form-group">
                 <label for="zip">Zip Code</label>
-                <input type="text" name="zip" id="zip" class="form-control" placeholder="07470" required>
+                <input type="text" name="zip" id="zip" class="form-control"
+                    value="<?php echo $zip; ?>" required>
             </div>
 
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-primary">Update Profile</button>
         </form>
     </div>
 
-    <!-- Bootstrap JQuery, Ajax & JavaScript CDN -->
+    <!-- Bootstrap JavaScript Bundle CDNs -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
     </script>

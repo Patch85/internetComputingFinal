@@ -57,21 +57,36 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="products.php">Products</a>
+                    <a class="nav-link" href="products.php" tabindex="-1">Products</a>
                 </li>
 
-                <li class="nav-item">
-                    <a class="nav-link" href="register.php" tabindex="-1">Register</a>
-                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account</a>
 
-                <li class="nav-item">
-                    <a class="nav-link" href="login.php">Log In</a>
-                </li>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">                        
+                        <a class="dropdown-item " href="login.php">Log In</a>
 
-                <li class="nav-item">
-                    <a class="nav-link" href="logout.php">Log Out</a>
-                </li>
+                        <div class="dropdown-divider"></div>
 
+                        <a class="dropdown-item " href="register.php">Register</a>
+
+                        <div class="dropdown-divider"></div>
+
+                        <a class="dropdown-item " href="customerProfile.php">View/Update Profile</a>
+
+                        <div class="dropdown-divider"></div>
+
+                        <a class="dropdown-item " href="changePassword.php">Change Password</a>
+
+                        <div class="dropdown-divider"></div>
+
+                        <a class="dropdown-item  disabled" href="#">Order History</a>
+
+                        <div class="dropdown-divider"></div>
+
+                        <a class="dropdown-item " href="logout.php">Log Out</a>
+                    </div>
+                </li>
             </ul>
 
             <!-- Allow searching for products from the navbar -->

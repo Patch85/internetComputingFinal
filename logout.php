@@ -27,15 +27,16 @@
 </head>
 
 <body>
+    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-
+        <!-- DDM Brand -->
         <a class="navbar-brand" href="index.php">DDM, Inc.</a>
-
+        <!-- Use Bootstrap's Toggler to allow for expanding from and collapsing to a hamburger menu -->
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navLinks"
             aria-controls="navLinks" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-
+        <!-- Provide Nav links in a List  -->
         <div class="collapse navbar-collapse" id="navLinks">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
@@ -43,24 +44,42 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="products.php">Products</a>
+                    <a class="nav-link" href="products.php" tabindex="-1">Products</a>
                 </li>
 
-                <li class="nav-item">
-                    <a class="nav-link" href="register.php" tabindex="-1">Register</a>
-                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account</a>
 
-                <li class="nav-item">
-                    <a class="nav-link" href="login.php">Log In</a>
-                </li>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">                        
+                        <a class="dropdown-item" href="login.php">Log In</a>
 
-                <li class="nav-item">
-                    <a class="nav-link active" href="logout.php">Log Out<span class="sr-only">(current)</span></a>
+                        <div class="dropdown-divider"></div>
+
+                        <a class="dropdown-item " href="register.php">Register</a>
+
+                        <div class="dropdown-divider"></div>
+
+                        <a class="dropdown-item" href="customerProfile.php">View/Update Profile<</a>
+
+                        <div class="dropdown-divider"></div>
+
+                        <a class="dropdown-item " href="changePassword.php">Change Password</a>
+
+                        <div class="dropdown-divider"></div>
+
+                        <a class="dropdown-item  disabled" href="#">Order History</a>
+
+                        <div class="dropdown-divider"></div>
+
+                        <a class="dropdown-item active" href="logout.php">Log Out<span class="sr-only">(current)</span></a>
+                    </div>
                 </li>
             </ul>
 
+            <!-- Allow searching for products from the navbar -->
             <form class="form-inline my-2 my-lg-0" action="searchResults.php" method="post">
-                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"
+                    name="SearchQuery">
                 <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
             </form>
         </div>
