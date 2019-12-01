@@ -19,11 +19,11 @@
     }
 
     $SearchTerm = $_POST['SearchQuery'];
-    //echo $result;
+    $category = $_POST['categoryInput'];
 
     $SearchQuery = "SELECT *
                     FROM products
-                    WHERE productName
+                    WHERE ".$category."
                     LIKE \"%".$SearchTerm."%\"";
 
     $statementSearch = $db->prepare($SearchQuery);
@@ -124,7 +124,10 @@
     echo $result['price'];
     echo "<br/>";
     echo $result['description'];
-    echo "<br/><br/><br/>";
+    echo "<br/>"; ?>
+    <img src="/assets/images/productImages/<?php echo $result['imagePath']; ?>">
+    <?php
+    echo "<br/> <br/>";
 } ?>
 
     </div>
