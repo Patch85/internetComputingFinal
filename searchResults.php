@@ -19,7 +19,7 @@
     }
 
     $SearchTerm = $_POST['SearchQuery'];
-    //echo $result;
+    
 
     $SearchQuery = "SELECT *
                     FROM products
@@ -109,23 +109,23 @@
 
     <div class="container-fluid">
         <?php foreach ($results as $result) {
-    echo $result['productName'];
-    echo "<br/>";
-    echo $result['productNumber'];
-    echo "<br/>";
-    echo $result['category'];
-    echo "<br/>";
-    echo $result['subcategory'];
-    echo "<br/>";
-    echo $result['manufacturer'];
-    echo "<br/>";
-    echo $result['numInStock'];
-    echo "<br/>";
-    echo $result['price'];
-    echo "<br/>";
-    echo $result['description'];
-    echo "<br/><br/><br/>";
-} ?>
+            echo $result['productName'];
+            echo "<br/>";
+            echo $result['productNumber'];
+            echo "<br/>";
+            echo $result['category'];
+            echo "<br/>";
+            echo $result['subcategory'];
+            echo "<br/>";
+            echo $result['manufacturer'];
+            echo "<br/>";
+            echo $result['numInStock'];
+            echo "<br/>";
+            echo $result['price'];
+            echo "<br/>";
+            echo $result['description'];
+            echo "<br/><br/><br/>";
+        } ?>
 
     </div>
 

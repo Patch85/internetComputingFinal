@@ -35,6 +35,9 @@
 
     <!-- Add the custom CSS on top of Bootstrap -->
     <link rel="stylesheet" href="assets\styles\custom.css">
+
+    <!-- FontAwesome -->
+    <script src="https://kit.fontawesome.com/69d8b1cf3c.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -119,8 +122,9 @@
             <!-- Create a card for each product -->
             <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2">
                 <div class="card m-2">
-                    <img src="<?php echo $product['imagePath']; ?>"
-                        class="card-img-top" alt="...">
+                    <img src="assets\images\productImages\resized\<?php echo $product['imagePath']; ?>"
+                        class="card-img-top"
+                        alt="Image of <?php echo $product['productName'] ?>">
 
                     <div class="card-body">
                         <h5 class="card-title"><?php echo $product['productName']; ?>
@@ -129,13 +133,58 @@
                         <h6 class="card-subtitle text-muted mb-2">$<?php echo $product['price']; ?>
                         </h6>
 
-                        <p class="card-text"><?php echo substr($product['description'], 0, 35) . "..."; ?>
-                        </p>
+                        <!-- <p class="card-text"><?php echo substr($product['description'], 0, 35) . "..."; ?>
+                        </p> -->
 
-                        <a href="#" class="btn btn-success">Add to Cart</a>
+                        <div>
+                            <button type="button" class="btn btn-primary mr-5" data-toggle="modal"
+                                data-target="#<?php echo $product['productName']; ?>">
+                                <i class="fas fa-expand-arrows-alt"></i>
+                            </button>
+
+                            <a href="#" class="btn btn-success"><i class="fas fa-cart-plus"></i></a>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Create the modal for each product  -->
+            <!-- Clicking on the expand button will show more detailed product info, with a larger image if available -->
+            <div class="modal fade"
+                id="<?php echo $product['productName']; ?>"
+                tabindex="-1" role="dialog"
+                aria-labelledby="<?php echo $product['productName']; ?>Title"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title"
+                                id="<?php echo $product['productName']; ?>Title">
+                                <?php echo $product['productName']; ?>
+                            </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <img src="assets\images\productImages\resized\<?php echo $product['imagePath']; ?>"
+                                class="card-img-top"
+                                alt="Image of <?php echo $product['productName'] ?>">
+
+                            <h6 class="text-muted">$<?php echo $product['price']; ?>
+                            </h6>
+
+                            <p><?php echo $product['description']; ?>
+                            </p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <a href="#" class="btn btn-success"><i class="fas fa-cart-plus"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <?php $product = $statement->fetch(); // get the next row
                 }
             ?>
