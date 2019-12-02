@@ -23,7 +23,7 @@
 
     $SearchQuery = "SELECT *
                     FROM products
-                    WHERE productName
+                    WHERE ".$category."
                     LIKE \"%".$SearchTerm."%\"";
 
     $statementSearch = $db->prepare($SearchQuery);
