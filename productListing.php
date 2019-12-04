@@ -54,16 +54,22 @@ if (!empty($category)) {
         <th>ID</th>
         <th>Name</th>
         <th>Price</th>
+        <th>Current stock</th>
       </tr>
       <?php foreach ($products as $product) { ?>
       <tr>
         <td><?php echo $product['productNumber']; ?></td>
         <td><?php echo $product['productName']; ?></td>
         <td><?php echo $product['price']; ?></td>
+        <td><?php echo $product['numInStock']; ?></td>
         <td> <form action="deleteProduct.php" method="post">
           <input type="hidden" name="product_id" value="<?php echo $product['productNumber']; ?>">
          <input type="submit" value="Delete">
        </form></td>
+       <td> <form action="updateStockForm.php" method="post">
+         <input type="hidden" name="product_id" value="<?php echo $product['productNumber']; ?>">
+         <input type="submit" value="Update stock">
+       </form> </td>
 
       </tr>
     <?php } ?>
