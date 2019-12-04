@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>AddProduct</title>
+  </head>
+  <body>
+    <h1>Add a product</h1>
+    <form class="" action="addProduct.php" method="post">
+      <table border="0">
+        <tr>
+          <td>Product Name:</td>
+          <td><input type="text" name="ProductName" require></td>
+        </tr>
+        <tr>
+          <td>Category:</td>
+          <td><select name="category">
+            <option value="">-</option>
+            <option value="String">String</option>
+            <option value="Woodwind">Woodwind</option>
+            <option value="Brass">Brass</option>
+            <option value="Keyboard">Keyboard</option>
+            <option value="Percussion">Percussion</option>
+          </select></td>
+        </tr>
+        <tr>
+          <td>Subcategory:</td>
+          <td><input type="text" name="Subcategory"> (optional)</td>
+        </tr>
+        <tr>
+          <td>Manufacturer:</td>
+          <td><input type="text" name="manufacturer" require></td>
+        </tr>
+        <tr>
+          <td>Stock:</td>
+          <td><input type="text" name="stock" require></td>
+        </tr>
+        <tr>
+          <td>price:</td>
+          <td><input type="text" name="price" require></td>
+        </tr>
+        <tr>
+          <td>description:</td>
+          <td><textarea name="description" rows="8" cols="80" require></textarea></td>
+        </tr>
+        <tr>
+          <td>image:</td>
+          <td><input type="text" name="image"></td>
+        </tr>
+      </table>
+      <input type="submit" value="Add product">
+    </form>
+    <a href="productListing.php">Delete product</a>
+  </body>
+</html>
