@@ -35,6 +35,6 @@ $statementInsert->bindValue(':productID', $productID);
 $statementInsert->execute();
 $statementInsert->closeCursor();
 
-echo "<strong>Successful update to product</strong> <br />";
+$word = "<strong>Successful update to product</strong> <br />";
 include('productListing.php');
 ?>
