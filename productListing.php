@@ -37,15 +37,110 @@ if (!empty($category)) {
 ?>
 
 <html lang="en" dir="ltr">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-<head>
-  <meta charset="utf-8">
-  <title>Delete Product</title>
-</head>
+      <title>DDM, Inc. Music Shop</title>
 
-<body>
-  Display a specific category:
-  <form action="deleteProduct.php" method="post">
+      <!-- Bootstrap CSS CDN -->
+      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+
+      <!-- Add the custom CSS on top of Bootstrap -->
+      <link rel="stylesheet" href="assets\styles\custom.css">
+
+      <!-- FontAwesome -->
+      <script src="https://kit.fontawesome.com/69d8b1cf3c.js" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <!-- DDM Brand -->
+        <a class="navbar-brand" href="index.php">DDM, Inc.</a>
+        <!-- Use Bootstrap's Toggler to allow for expanding from and collapsing to a hamburger menu -->
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navLinks"
+            aria-controls="navLinks" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <!-- Provide Nav links in a List  -->
+        <div class="collapse navbar-collapse" id="navLinks">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="index.php">Home <span class="sr-only">(current)</span></a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="products.php" tabindex="-1">Products</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="viewCart.php">Shopping Cart</a>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account</a>
+
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item " href="login.php">Log In</a>
+
+                        <div class="dropdown-divider"></div>
+
+                        <a class="dropdown-item " href="register.php">Register</a>
+
+                        <div class="dropdown-divider"></div>
+
+                        <a class="dropdown-item " href="customerProfile.php">View/Update Profile</a>
+
+                        <div class="dropdown-divider"></div>
+
+                        <a class="dropdown-item " href="changePassword.php">Change Password</a>
+
+                        <div class="dropdown-divider"></div>
+
+                        <a class="dropdown-item  disabled" href="#">Order History</a>
+
+                        <div class="dropdown-divider"></div>
+
+                        <a class="dropdown-item " href="logout.php">Log Out</a>
+                    </div>
+                </li>
+            </ul>
+
+            <!-- Allow searching for products from the navbar -->
+            <form class="form-inline my-2 my-lg-0" action="searchResults.php" method="post">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"
+                    name="SearchQuery">
+
+                <select class="form-control mr-sm-2" name="categoryInput">
+                    <option value="productName">Product Name</option>
+                    <option value="category">Category</option>
+                    <option value="subcategory">subcategory</option>
+                    <option value="manufacturer">Manufacturer</option>
+                </select>
+
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- Jumbotron/Hero element : Features a random background image and a tagline for the company -->
+    <div class="jumbotron jumbotron-fluid musicJumbotron">
+        <div class="container">
+            <h1 class="jumboHeading">DDM</h1>
+            <h2 class="jumboTagline">The Only Place for all Your Musical Needs</h2>
+        </div>
+    </div>
+    <div class="container">
+      <?php if (isset($word)) {
+         echo "<p>$word</p>";
+       } ?>
+
+    Display a specific category:
+    <form action="deleteProduct.php" method="post">
     <select name="category">
       <option value="">-</option>
       <option value="String">String</option>
@@ -54,46 +149,40 @@ if (!empty($category)) {
       <option value="Keyboard">Keyboard</option>
       <option value="Percussion">Percussion</option>
     </select>
-    <input type="submit" value="Submit">
-  </form>
+    <input type="submit" value="Submit" class="btn btn-success" >
+    </form>
 
-  <caption>Product Listing</caption>
-  <table border="1">
-    <tr>
-      <th>ID</th>
-      <th>Name</th>
-      <th>Price</th>
-      <th>Current stock</th>
-    </tr>
-    <?php foreach ($products as $product) { ?>
-    <tr>
-      <td><?php echo $product['productNumber']; ?>
-      </td>
-      <td><?php echo $product['productName']; ?>
-      </td>
-      <td><?php echo $product['price']; ?>
-      </td>
-      <td><?php echo $product['numInStock']; ?>
-      </td>
-      <td>
-        <form action="deleteProduct.php" method="post">
-          <input type="hidden" name="product_id"
-            value="<?php echo $product['productNumber']; ?>">
-          <input type="submit" value="Delete">
-        </form>
-      </td>
-      <td>
-        <form action="updateStockForm.php" method="post">
-          <input type="hidden" name="product_id"
-            value="<?php echo $product['productNumber']; ?>">
-          <input type="submit" value="Update stock">
-        </form>
-      </td>
+    <a href="addProductForm.html">Add a product</a>
+    <table class="table table-sm">
+      <thead class="thead-dark">
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Name</th>
+        <th scope="col">Price</th>
+        <th scope="col">Current stock</th>
+        <th scope="col">Delete product</th>
+        <th scope="col">Update stock</th>
+      </tr>
+    </thead>
+      <?php foreach ($products as $product) { ?>
+      <tr>
+        <td><?php echo $product['productNumber']; ?></td>
+        <td><?php echo $product['productName']; ?></td>
+        <td><?php echo $product['price']; ?></td>
+        <td><?php echo $product['numInStock']; ?></td>
+        <td> <form action="deleteProduct.php" method="post">
+          <input type="hidden" name="product_id" value="<?php echo $product['productNumber']; ?>">
+         <input type="submit" value="Delete" class="btn btn-danger" >
+       </form></td>
+       <td> <form action="updateStockForm.php" method="post">
+         <input type="hidden" name="product_id"  value="<?php echo $product['productNumber']; ?>">
+         <input type="submit" class="btn btn-success"  value="Update stock">
+       </form> </td>
 
-    </tr>
+      </tr>
     <?php } ?>
-  </table>
-  <a href="addProductForm.html">Add a product</a>
-</body>
+    </table>
+</div>
 
+  </body>
 </html>
