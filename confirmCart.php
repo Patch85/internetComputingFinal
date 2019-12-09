@@ -4,10 +4,12 @@
     session_start();
 
     // Create a mulitdimensional array to hold shopping cart data
-    // Check for an existing cart. Create one if it doesn't exist yet. Add the new item if it does
     if (!isset($_SESSION['cart'])) {
         $_SESSION['cart']  = array();
     }
+    $cartTotal = 0.00;
+    $itemCount = 0;
+
     // Set PDO variables
     $dsn = 'mysql:host=localhost;dbname=music';
     // musicman has global privileges for the music database
@@ -23,10 +25,6 @@
         echo " <p>An error occurred while connecting to the database: $error_message</p>";
         die();
     }
-
-    // Declare an array to hold featured product data
-    $featuredProducts = array();
-
 ?>
 
 <!DOCTYPE html>
@@ -42,7 +40,6 @@
     <!-- Bootstrap CSS CDN -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
 
     <!-- Add the custom CSS on top of Bootstrap -->
     <link rel="stylesheet" href="assets\styles\custom.css">
@@ -127,112 +124,48 @@
     <!-- Jumbotron/Hero element : Features a random background image and a tagline for the company -->
     <div class="jumbotron jumbotron-fluid musicJumbotron">
         <div class="container">
-            <h1 class="jumboHeading">DDM</h1>
-            <h2 class="jumboTagline">The Only Place for all Your Musical Needs</h2>
+            <h1 class="jumboHeading">Confirm Cart Details</h1>
         </div>
     </div>
 
-    <!-- Main Section of the page: Show 6 Featured Products as cards with brief descriptions -->
-    <div class="container-fluid">
-        <h3 class="display-4">Featured Products</h3>
+    <!-- View Shopping Cart: Display a table of all cart contents, allow for updating quantity -->
+    <div class="container">
+        <table class="table">
+            <thead class="thead-dark">
+                <th scope="col"> # </th>
+                <th scope="col">Product</th>
+                <th scope="col">Price</th>
+                <th scope="col">Quantity</th>
+            </thead>
 
-        <!-- Randomly select 6 products to feature -->
-        <div class="row">
-            <?php for ($i=0; $i < 6; $i++) {
-    // Generate a random number between 1 and 25
-    $productNumber = mt_rand(1, 25);
+            <!-- For each product in the Cart, display a row -->
+            <tbody>
+                <?php foreach ($_SESSION['cart'] as $item) {
+    if ($item['quantity'] > 0) {
+        ++$itemCount; ?>
+                <tr>
+                    <th scope="row"> <?php echo $itemCount; ?>
+                    </th>
 
-    // Query the database and retrieve the data for the product with that productNumber
-    $query = "SELECT * FROM products WHERE productNumber = :productNumber";
-    $statement = $db->prepare($query);
-    $statement->bindValue(":productNumber", $productNumber);
-    $statement->execute();
-    $featuredProducts[] = $statement->fetch();
-    $statement->closeCursor();
-} ?>
+                    <td><?php echo $item['productName']; ?>
+                    </td>
 
-            <?php
-                foreach ($featuredProducts as $product) { ?>
-            <!-- Create a card for each product -->
-            <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2">
-                <div class="card m-2">
-                    <img src="assets\images\productImages\resized\<?php echo $product['imagePath']; ?>"
-                        class="card-img-top"
-                        alt="Image of <?php echo $product['productName'] ?>">
+                    <td><em>$<?php echo number_format($item['price'], 2); ?></em>
+                    </td>
 
-                    <div class="card-body">
-                        <h5 class="card-title"><?php echo $product['productName']; ?>
-                        </h5>
+                    <td>
+                        <?php echo $item['quantity']; ?>
+                    </td>
+                </tr>
+                <?php $cartTotal = floatval($cartTotal) + (floatval($item['price']) * floatval($item['quantity']));
+    }
+}?>
+            </tbody>
+        </table>
+        <p class="mt-2"><em><strong>Cart Total = $<?php echo $cartTotal ?></strong></em></p>
 
-                        <h6 class="card-subtitle text-muted mb-2">$<?php echo $product['price']; ?>
-                        </h6>
+        <a href="shipping.php" class="btn btn-success">Proceed to Checkout</a>
 
-                        <form action="addToCart.php" method="post" class="mt-2">
-                            <input type="hidden" name="productName"
-                                value="<?php echo $product['productName']; ?>">
-                            <input type="hidden" name="price"
-                                value="<?php echo $product['price']; ?>">
-                            <input type="hidden" name="quantity" value="1">
-
-                            <button type="button" class="btn btn-primary mr-5" data-toggle="modal"
-                                data-target="#<?php echo $product['productName']; ?>">
-                                <i class="fas fa-expand-arrows-alt"></i>
-                            </button>
-
-                            <button type="submit" class="btn btn-success"><i class="fas fa-cart-plus"></i></button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Create the modal for each product  -->
-            <!-- Clicking on the expand button will show more detailed product info, with a larger image if available -->
-            <div class="modal fade"
-                id="<?php echo $product['productName']; ?>"
-                tabindex="-1" role="dialog"
-                aria-labelledby="<?php echo $product['productName']; ?>Title"
-                aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title"
-                                id="<?php echo $product['productName']; ?>Title">
-                                <?php echo $product['productName']; ?>
-                            </h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <img src="assets\images\productImages\resized\<?php echo $product['imagePath']; ?>"
-                                class="card-img-top"
-                                alt="Image of <?php echo $product['productName'] ?>">
-
-                            <h6 class="text-muted">$<?php echo $product['price']; ?>
-                            </h6>
-
-                            <p><?php echo $product['description']; ?>
-                            </p>
-                        </div>
-                        <div class="modal-footer">
-                            <form action="addToCart.php" method="post" class="mt-2">
-                                <input type="hidden" name="productName"
-                                    value="<?php echo $product['productName']; ?>">
-                                <input type="hidden" name="price"
-                                    value="<?php echo $product['price']; ?>">
-                                <input type="hidden" name="quantity" value="1">
-
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-
-                                <button type="submit" class="btn btn-success"><i class="fas fa-cart-plus"></i></button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <?php } ?>
-
-        </div>
     </div>
 
     <!-- Bootstrap: jQuery, ajax & JavaScript Bundle CDNs -->

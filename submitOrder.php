@@ -5,8 +5,9 @@
 
     // Create a mulitdimensional array to hold shopping cart data
     // Check for an existing cart. Create one if it doesn't exist yet. Add the new item if it does
-    if (!isset($_SESSION['cart'])) {
-        $_SESSION['cart']  = array();
+    if (!isset($_SESSION['cart']) || !isset($_SESSION['shipping'])) {
+        // If there is no cart or shipping info at this stage, the user should be redirected
+        header("Location: index.php");
     }
     // Set PDO variables
     $dsn = 'mysql:host=localhost;dbname=music';
@@ -24,9 +25,69 @@
         die();
     }
 
-    // Declare an array to hold featured product data
-    $featuredProducts = array();
+    // If the user has progessed through checkout, and confirmed their order, continue to
+    // insert the order into the database
+    if (isset($_SESSION['shipping']['firstName'])) {
+        $time = new DateTime("now");
+        $time = $time->format("r");
 
+        $query = "INSERT INTO orders
+            (accountNumber, forFirstName, forLastName, shipAddress1, shipAddress2, shipCity, shipState shipZip, comments)
+            VALUES 
+            (:accountNumber,:forFirstName, :forLastName, :shipAddress1, :shipAddress2, :shipCity, :shipState, :shipZip, :comments)";
+        
+        $statement = $db->prepare($query);
+
+        $statement->bindValue(':accountNumber', $_SESSION['acctNum']);
+        // $statement->bindValue(':orderDate', $time);
+        $statement->bindValue(':forFirstName', $_SESSION['shipping']['firstName']);
+        $statement->bindValue(':forLastName', $_SESSION['shipping']['lastName']);
+        $statement->bindValue(':shipAddress1', $_SESSION['shipping']['address1']);
+        $statement->bindValue(':shipAddress2', $_SESSION['shipping']['address2']);
+        $statement->bindValue(':shipCity', $_SESSION['shipping']['city']);
+        $statement->bindValue(':shipState', $_SESSION['shipping']['state']);
+        $statement->bindValue(':shipZip', $_SESSION['shipping']['zip']);
+        $statement->bindValue(':comments', $_SESSION['shipping']['comments']);
+
+        $statement->execute();
+
+        $orderNumber = $db->lastInsertId();
+
+        $statement->closeCursor();
+
+        foreach ($_SESSION['cart'] as $item) {
+            if ($item['quantity'] > 0) {
+                $pName = $item['productName'];
+                $price = $item['price'];
+                $qty = $item['quantity'];
+
+                $selectQuery = "SELECT productNumber FROM products WHERE productName = :productName";
+
+                $statement = $db->prepare($selectQuery);
+                $statement->bindValue(':productName', $pName);
+                $statement->execute();
+
+                $pNum = $statement->fetchColumn();
+
+                $statement->closeCursor();
+
+                $insertQuery = "INSERT INTO order_items
+                        (orderNumber, productNumber, price, quantity)
+                    VALUES
+                        (:orderNumber, :productNumber, :price, :quantity)";  
+
+                $statement = $db->prepare($insertQuery);
+
+                $statement->bindValue(':orderNumber', $orderNumber);
+                $statement->bindValue(':productNumber', $pNum);
+                $statement->bindValue(':price', $price);
+                $statement->bindValue(':quantity', $qty);
+
+                $statement->execute();
+                $statement->closeCursor();
+            }
+        }
+    }
 ?>
 
 <!DOCTYPE html>
@@ -127,112 +188,14 @@
     <!-- Jumbotron/Hero element : Features a random background image and a tagline for the company -->
     <div class="jumbotron jumbotron-fluid musicJumbotron">
         <div class="container">
-            <h1 class="jumboHeading">DDM</h1>
-            <h2 class="jumboTagline">The Only Place for all Your Musical Needs</h2>
+            <h1 class="jumboHeading">Order Submitted</h1>
+            <h2 class="jumboTagline">Thanks for shopping at DDM!</h2>
         </div>
     </div>
 
     <!-- Main Section of the page: Show 6 Featured Products as cards with brief descriptions -->
     <div class="container-fluid">
-        <h3 class="display-4">Featured Products</h3>
-
-        <!-- Randomly select 6 products to feature -->
-        <div class="row">
-            <?php for ($i=0; $i < 6; $i++) {
-    // Generate a random number between 1 and 25
-    $productNumber = mt_rand(1, 25);
-
-    // Query the database and retrieve the data for the product with that productNumber
-    $query = "SELECT * FROM products WHERE productNumber = :productNumber";
-    $statement = $db->prepare($query);
-    $statement->bindValue(":productNumber", $productNumber);
-    $statement->execute();
-    $featuredProducts[] = $statement->fetch();
-    $statement->closeCursor();
-} ?>
-
-            <?php
-                foreach ($featuredProducts as $product) { ?>
-            <!-- Create a card for each product -->
-            <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2">
-                <div class="card m-2">
-                    <img src="assets\images\productImages\resized\<?php echo $product['imagePath']; ?>"
-                        class="card-img-top"
-                        alt="Image of <?php echo $product['productName'] ?>">
-
-                    <div class="card-body">
-                        <h5 class="card-title"><?php echo $product['productName']; ?>
-                        </h5>
-
-                        <h6 class="card-subtitle text-muted mb-2">$<?php echo $product['price']; ?>
-                        </h6>
-
-                        <form action="addToCart.php" method="post" class="mt-2">
-                            <input type="hidden" name="productName"
-                                value="<?php echo $product['productName']; ?>">
-                            <input type="hidden" name="price"
-                                value="<?php echo $product['price']; ?>">
-                            <input type="hidden" name="quantity" value="1">
-
-                            <button type="button" class="btn btn-primary mr-5" data-toggle="modal"
-                                data-target="#<?php echo $product['productName']; ?>">
-                                <i class="fas fa-expand-arrows-alt"></i>
-                            </button>
-
-                            <button type="submit" class="btn btn-success"><i class="fas fa-cart-plus"></i></button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Create the modal for each product  -->
-            <!-- Clicking on the expand button will show more detailed product info, with a larger image if available -->
-            <div class="modal fade"
-                id="<?php echo $product['productName']; ?>"
-                tabindex="-1" role="dialog"
-                aria-labelledby="<?php echo $product['productName']; ?>Title"
-                aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title"
-                                id="<?php echo $product['productName']; ?>Title">
-                                <?php echo $product['productName']; ?>
-                            </h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <img src="assets\images\productImages\resized\<?php echo $product['imagePath']; ?>"
-                                class="card-img-top"
-                                alt="Image of <?php echo $product['productName'] ?>">
-
-                            <h6 class="text-muted">$<?php echo $product['price']; ?>
-                            </h6>
-
-                            <p><?php echo $product['description']; ?>
-                            </p>
-                        </div>
-                        <div class="modal-footer">
-                            <form action="addToCart.php" method="post" class="mt-2">
-                                <input type="hidden" name="productName"
-                                    value="<?php echo $product['productName']; ?>">
-                                <input type="hidden" name="price"
-                                    value="<?php echo $product['price']; ?>">
-                                <input type="hidden" name="quantity" value="1">
-
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-
-                                <button type="submit" class="btn btn-success"><i class="fas fa-cart-plus"></i></button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <?php } ?>
-
-        </div>
+        <p>Order Number: <?php echo $orderNumber; ?> Confirmed</p>
     </div>
 
     <!-- Bootstrap: jQuery, ajax & JavaScript Bundle CDNs -->

@@ -108,6 +108,10 @@
                     <a class="nav-link" href="products.php" tabindex="-1">Products</a>
                 </li>
 
+                <li class="nav-item">
+                    <a class="nav-link" href="viewCart.php">Shopping Cart</a>
+                </li>
+
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account</a>
 

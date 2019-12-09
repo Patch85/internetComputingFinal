@@ -23,10 +23,23 @@
         echo " <p>An error occurred while connecting to the database: $error_message</p>";
         die();
     }
+    // Set page variables
+    $itemCount = 0;
+    $cartTotal = 0;
 
-    // Declare an array to hold featured product data
-    $featuredProducts = array();
-
+    // Save user's shipping address to session
+    if (isset($_POST['firstName'])) {
+        $_SESSION['shipping'] = array(
+            'firstName' => $_POST['firstName'],
+            'lastName' => $_POST['lastName'],
+            'address1' => $_POST['address1'],
+            'address2' => $_POST['address2'],
+            'city' => $_POST['city'],
+            'state' => $_POST['state'],
+            'zip' => $_POST['zip'],
+            'comments' => $_POST['comments']
+        );
+    }
 ?>
 
 <!DOCTYPE html>
@@ -127,112 +140,65 @@
     <!-- Jumbotron/Hero element : Features a random background image and a tagline for the company -->
     <div class="jumbotron jumbotron-fluid musicJumbotron">
         <div class="container">
-            <h1 class="jumboHeading">DDM</h1>
-            <h2 class="jumboTagline">The Only Place for all Your Musical Needs</h2>
+            <h1 class="jumboHeading"><?php echo $_SESSION['userName']."'s "; ?>Order
+            </h1>
+            <h2 class="jumboTagline">Confirm Order Details</h2>
         </div>
     </div>
 
     <!-- Main Section of the page: Show 6 Featured Products as cards with brief descriptions -->
     <div class="container-fluid">
-        <h3 class="display-4">Featured Products</h3>
 
-        <!-- Randomly select 6 products to feature -->
-        <div class="row">
-            <?php for ($i=0; $i < 6; $i++) {
-    // Generate a random number between 1 and 25
-    $productNumber = mt_rand(1, 25);
-
-    // Query the database and retrieve the data for the product with that productNumber
-    $query = "SELECT * FROM products WHERE productNumber = :productNumber";
-    $statement = $db->prepare($query);
-    $statement->bindValue(":productNumber", $productNumber);
-    $statement->execute();
-    $featuredProducts[] = $statement->fetch();
-    $statement->closeCursor();
-} ?>
-
-            <?php
-                foreach ($featuredProducts as $product) { ?>
-            <!-- Create a card for each product -->
-            <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2">
-                <div class="card m-2">
-                    <img src="assets\images\productImages\resized\<?php echo $product['imagePath']; ?>"
-                        class="card-img-top"
-                        alt="Image of <?php echo $product['productName'] ?>">
-
-                    <div class="card-body">
-                        <h5 class="card-title"><?php echo $product['productName']; ?>
-                        </h5>
-
-                        <h6 class="card-subtitle text-muted mb-2">$<?php echo $product['price']; ?>
-                        </h6>
-
-                        <form action="addToCart.php" method="post" class="mt-2">
-                            <input type="hidden" name="productName"
-                                value="<?php echo $product['productName']; ?>">
-                            <input type="hidden" name="price"
-                                value="<?php echo $product['price']; ?>">
-                            <input type="hidden" name="quantity" value="1">
-
-                            <button type="button" class="btn btn-primary mr-5" data-toggle="modal"
-                                data-target="#<?php echo $product['productName']; ?>">
-                                <i class="fas fa-expand-arrows-alt"></i>
-                            </button>
-
-                            <button type="submit" class="btn btn-success"><i class="fas fa-cart-plus"></i></button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Create the modal for each product  -->
-            <!-- Clicking on the expand button will show more detailed product info, with a larger image if available -->
-            <div class="modal fade"
-                id="<?php echo $product['productName']; ?>"
-                tabindex="-1" role="dialog"
-                aria-labelledby="<?php echo $product['productName']; ?>Title"
-                aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title"
-                                id="<?php echo $product['productName']; ?>Title">
-                                <?php echo $product['productName']; ?>
-                            </h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <img src="assets\images\productImages\resized\<?php echo $product['imagePath']; ?>"
-                                class="card-img-top"
-                                alt="Image of <?php echo $product['productName'] ?>">
-
-                            <h6 class="text-muted">$<?php echo $product['price']; ?>
-                            </h6>
-
-                            <p><?php echo $product['description']; ?>
-                            </p>
-                        </div>
-                        <div class="modal-footer">
-                            <form action="addToCart.php" method="post" class="mt-2">
-                                <input type="hidden" name="productName"
-                                    value="<?php echo $product['productName']; ?>">
-                                <input type="hidden" name="price"
-                                    value="<?php echo $product['price']; ?>">
-                                <input type="hidden" name="quantity" value="1">
-
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-
-                                <button type="submit" class="btn btn-success"><i class="fas fa-cart-plus"></i></button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <?php } ?>
-
+        <div class="container">
+            <h3>Ship To:</h3>
+            <p><?php echo $_POST['firstName']." ".$_POST['lastName'] ?>
+            </p>
+            <p><?php echo $_POST['address1']; ?><br>
+                <?php echo $_POST['address2'];?>
+            </p>
+            <p><?php echo $_POST['city'].", ".$_POST['state']." ".$_POST['zip'] ;?>
+            </p>
+            <h5>Comments:</h5>
+            <p><?php echo $_POST['comments'] ?>
+            </p>
         </div>
+
+
+        <table class="table">
+            <thead class="thead-dark">
+                <th scope="col"> # </th>
+                <th scope="col">Product</th>
+                <th scope="col">Price</th>
+                <th scope="col">Quantity</th>
+            </thead>
+
+            <!-- For each product in the Cart, display a row -->
+            <tbody>
+                <?php foreach ($_SESSION['cart'] as $item) {
+    if ($item['quantity'] > 0) {
+        ++$itemCount; ?>
+                <tr>
+                    <th scope="row"> <?php echo $itemCount; ?>
+                    </th>
+
+                    <td><?php echo $item['productName']; ?>
+                    </td>
+
+                    <td><em>$<?php echo number_format($item['price'], 2); ?></em>
+                    </td>
+
+                    <td>
+                        <?php echo $item['quantity']; ?>
+                    </td>
+                </tr>
+                <?php $cartTotal = floatval($cartTotal) + (floatval($item['price']) * floatval($item['quantity']));
+    }
+}?>
+            </tbody>
+        </table>
+        <?php echo "Order Total: $".$cartTotal."<br>"; ?>
+
+        <a href="submitOrder.php" class="btn btn-success mt-3">Submit Order</a>
     </div>
 
     <!-- Bootstrap: jQuery, ajax & JavaScript Bundle CDNs -->

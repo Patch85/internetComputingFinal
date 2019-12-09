@@ -4,10 +4,12 @@
     session_start();
 
     // Create a mulitdimensional array to hold shopping cart data
-    // Check for an existing cart. Create one if it doesn't exist yet. Add the new item if it does
     if (!isset($_SESSION['cart'])) {
         $_SESSION['cart']  = array();
     }
+    $cartTotal = 0.00;
+    $itemCount = 0;
+
     // Set PDO variables
     $dsn = 'mysql:host=localhost;dbname=music';
     // musicman has global privileges for the music database
@@ -24,9 +26,30 @@
         die();
     }
 
-    // Declare an array to hold featured product data
-    $featuredProducts = array();
+    // Ensure that the user is logged in, redirect to login page if not
+    if (!isset($_SESSION['userName'])) {
+        header("Location: ./login.php");
+    } else {
+        // Get the user's address from the database
+        $query = "SELECT 
+            lastName, address1, address2, city, state, zip 
+            FROM users 
+            WHERE accountNumber = :accountNumber";
+        $statement = $db->prepare($query);
+        $statement->bindValue(":accountNumber", $_SESSION['acctNum']);
+        $statement->execute();
+        $userData = $statement->fetch();
+        $statement->closeCursor();
 
+        // Assign the fetched data to variables for autofilling the form
+        $lastName = $userData['lastName'];
+        $address1 = $userData['address1'];
+        $address2 = $userData['address2'];
+        $city = $userData['city'];
+        $state = $userData['state'];
+        $zip = $userData['zip'];
+    }
+    
 ?>
 
 <!DOCTYPE html>
@@ -42,7 +65,6 @@
     <!-- Bootstrap CSS CDN -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
 
     <!-- Add the custom CSS on top of Bootstrap -->
     <link rel="stylesheet" href="assets\styles\custom.css">
@@ -127,112 +149,68 @@
     <!-- Jumbotron/Hero element : Features a random background image and a tagline for the company -->
     <div class="jumbotron jumbotron-fluid musicJumbotron">
         <div class="container">
-            <h1 class="jumboHeading">DDM</h1>
-            <h2 class="jumboTagline">The Only Place for all Your Musical Needs</h2>
+            <h1 class="jumboHeading">Check Out</h1>
+            <h2 class="jumboTagline">Shipping & Payment</h2>
         </div>
     </div>
 
-    <!-- Main Section of the page: Show 6 Featured Products as cards with brief descriptions -->
-    <div class="container-fluid">
-        <h3 class="display-4">Featured Products</h3>
+    <div class="container">
 
-        <!-- Randomly select 6 products to feature -->
-        <div class="row">
-            <?php for ($i=0; $i < 6; $i++) {
-    // Generate a random number between 1 and 25
-    $productNumber = mt_rand(1, 25);
+        <h3 class="mb-2">If not shipping to the address you entered during registration, change the shipping address
+            here. </h3>
 
-    // Query the database and retrieve the data for the product with that productNumber
-    $query = "SELECT * FROM products WHERE productNumber = :productNumber";
-    $statement = $db->prepare($query);
-    $statement->bindValue(":productNumber", $productNumber);
-    $statement->execute();
-    $featuredProducts[] = $statement->fetch();
-    $statement->closeCursor();
-} ?>
+        <form class="col-md-6 m-auto" action="confirmOrder.php" method="post">
 
-            <?php
-                foreach ($featuredProducts as $product) { ?>
-            <!-- Create a card for each product -->
-            <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2">
-                <div class="card m-2">
-                    <img src="assets\images\productImages\resized\<?php echo $product['imagePath']; ?>"
-                        class="card-img-top"
-                        alt="Image of <?php echo $product['productName'] ?>">
-
-                    <div class="card-body">
-                        <h5 class="card-title"><?php echo $product['productName']; ?>
-                        </h5>
-
-                        <h6 class="card-subtitle text-muted mb-2">$<?php echo $product['price']; ?>
-                        </h6>
-
-                        <form action="addToCart.php" method="post" class="mt-2">
-                            <input type="hidden" name="productName"
-                                value="<?php echo $product['productName']; ?>">
-                            <input type="hidden" name="price"
-                                value="<?php echo $product['price']; ?>">
-                            <input type="hidden" name="quantity" value="1">
-
-                            <button type="button" class="btn btn-primary mr-5" data-toggle="modal"
-                                data-target="#<?php echo $product['productName']; ?>">
-                                <i class="fas fa-expand-arrows-alt"></i>
-                            </button>
-
-                            <button type="submit" class="btn btn-success"><i class="fas fa-cart-plus"></i></button>
-                        </form>
-                    </div>
-                </div>
+            <div class="form-group">
+                <label for="firstName">Recipient's First Name</label>
+                <input type="text" name="firstName" id="firstName" class="form-control" placeholder="Jane"
+                    value="<?php echo $_SESSION['userName'] ?>"
+                    required>
             </div>
 
-            <!-- Create the modal for each product  -->
-            <!-- Clicking on the expand button will show more detailed product info, with a larger image if available -->
-            <div class="modal fade"
-                id="<?php echo $product['productName']; ?>"
-                tabindex="-1" role="dialog"
-                aria-labelledby="<?php echo $product['productName']; ?>Title"
-                aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title"
-                                id="<?php echo $product['productName']; ?>Title">
-                                <?php echo $product['productName']; ?>
-                            </h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <img src="assets\images\productImages\resized\<?php echo $product['imagePath']; ?>"
-                                class="card-img-top"
-                                alt="Image of <?php echo $product['productName'] ?>">
-
-                            <h6 class="text-muted">$<?php echo $product['price']; ?>
-                            </h6>
-
-                            <p><?php echo $product['description']; ?>
-                            </p>
-                        </div>
-                        <div class="modal-footer">
-                            <form action="addToCart.php" method="post" class="mt-2">
-                                <input type="hidden" name="productName"
-                                    value="<?php echo $product['productName']; ?>">
-                                <input type="hidden" name="price"
-                                    value="<?php echo $product['price']; ?>">
-                                <input type="hidden" name="quantity" value="1">
-
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-
-                                <button type="submit" class="btn btn-success"><i class="fas fa-cart-plus"></i></button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+            <div class="form-group">
+                <label for="lastName">Recipient's Last Name</label>
+                <input type="text" name="lastName" id="lastName" class="form-control" placeholder="Doe"
+                    value="<?php echo $lastName ?>" required>
             </div>
-            <?php } ?>
 
-        </div>
+            <div class="form-group">
+                <label for="address1">Ship To: Street Address</label>
+                <input type="text" name="address1" id="address1" class="form-control" placeholder="123 Main Street"
+                    value="<?php echo $address1 ?>" required>
+            </div>
+
+            <div class="form-group">
+                <label for="address2">Ship To: Unit/Apt Number</label>
+                <input type="text" name="address2" id="address2" class="form-control" placeholder="Unit #4A">
+                value="<?php echo $address2 ?>"
+            </div>
+
+            <div class="form-group">
+                <label for="city">Ship To: City</label>
+                <input type="text" name="city" id="city" class="form-control" placeholder="Your Town"
+                    value="<?php echo $city ?>" required>
+            </div>
+
+            <div class="form-group">
+                <label for="state">Ship To: State</label>
+                <input type="text" name="state" id="state" class="form-control" placeholder="Your State"
+                    value="<?php echo $state ?>" required>
+            </div>
+
+            <div class="form-group">
+                <label for="zip">Ship To: Zip Code</label>
+                <input type="text" name="zip" id="zip" class="form-control" placeholder="07470"
+                    value="<?php echo $zip ?>" required>
+            </div>
+
+            <div class="form-group">
+                <label for="comments">Shipping Comments</label>
+                <textarea name="comments" id="comments" cols="30" rows="10"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
     </div>
 
     <!-- Bootstrap: jQuery, ajax & JavaScript Bundle CDNs -->

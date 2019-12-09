@@ -2,7 +2,7 @@
     // Start a session
     session_start();
 
-    // Set initial variables
+    // Set PDO variables
     $dsn = 'mysql:host=localhost;dbname=music';
     // musicman has global privileges for the music database
     // make sure to create and use a more limited user for customer access
@@ -18,18 +18,43 @@
         die();
     }
 
-    $SearchTerm = $_POST['SearchQuery'];
-    
+    $results = array();
 
-    $SearchQuery = "SELECT *
-                    FROM products
-                    WHERE productName
-                    LIKE \"%".$SearchTerm."%\"";
+    // If the user has searched, get the post data and run the search
+    if (isset($_POST['searchQuery'])) {
+        $SearchTerm = $_POST['searchQuery'];
+        $category = $_POST['categoryInput'];
+        
+        // Query the database, using the user's input
 
-    $statementSearch = $db->prepare($SearchQuery);
-    $statementSearch->execute();
-    $results = $statementSearch->fetchAll();
-    $statementSearch->closeCursor();
+        // determine which query to run based on the user's selection from the dropdown menu
+        if ($category == "productName") {
+            $SearchQuery = "SELECT *
+            FROM products
+            WHERE productName
+            LIKE \"%".$SearchTerm."%\"";
+        } elseif ($category == "category"){
+            $SearchQuery = "SELECT *
+            FROM products
+            WHERE category
+            LIKE \"%".$SearchTerm."%\"";
+        } elseif( $category == "subcategory") {
+            $SearchQuery = "SELECT *
+            FROM products
+            WHERE subcategory
+            LIKE \"%".$SearchTerm."%\"";
+        } else{
+            $SearchQuery = "SELECT *
+            FROM products
+            WHERE manufacturer
+            LIKE \"%".$SearchTerm."%\"";
+        }        
+        // Prepare and execute the query, assinging the results to an array
+        $statementSearch = $db->prepare($SearchQuery);
+        $statementSearch->execute();
+        $results = $statementSearch->fetchAll();
+        $statementSearch->closeCursor();
+    }
 ?>
 
 <!DOCTYPE html>
@@ -45,6 +70,12 @@
     <!-- Bootstrap CSS CDN -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- Add the custom CSS on top of Bootstrap -->
+    <link rel="stylesheet" href="assets\styles\custom.css">
+
+    <!-- FontAwesome -->
+    <script src="https://kit.fontawesome.com/69d8b1cf3c.js" crossorigin="anonymous"></script>
 
 </head>
 
@@ -69,10 +100,15 @@
                     <a class="nav-link active" href="products.php" tabindex="-1">Products</a>
                 </li>
 
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account</a>
+                <li class="nav-item">
+                    <a class="nav-link" href="viewCart.php">Shopping Cart</a>
+                </li>
 
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">                        
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account</a>
+
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="login.php">Log In</a>
 
                         <div class="dropdown-divider"></div>
@@ -81,60 +117,130 @@
 
                         <div class="dropdown-divider"></div>
 
-                        <a class="dropdown-item" href="customerProfile.php">View/Update Profile<</a>
-
-                        <div class="dropdown-divider"></div>
-
-                        <a class="dropdown-item " href="changePassword.php">Change Password</a>
-
-                        <div class="dropdown-divider"></div>
-
-                        <a class="dropdown-item  disabled" href="#">Order History</a>
-
-                        <div class="dropdown-divider"></div>
-
-                        <a class="dropdown-item" href="logout.php">Log Out</a>
+                        <a class="dropdown-item" href="customerProfile.php">View/Update Profile<</a> <div
+                                class="dropdown-divider">
                     </div>
+
+                    <a class="dropdown-item " href="changePassword.php">Change Password</a>
+
+                    <div class="dropdown-divider"></div>
+
+                    <a class="dropdown-item  disabled" href="#">Order History</a>
+
+                    <div class="dropdown-divider"></div>
+
+                    <a class="dropdown-item" href="logout.php">Log Out</a>
                 </li>
             </ul>
+        </div>       
 
-            <!-- Allow searching for products from the navbar -->
-            <form class="form-inline my-2 my-lg-0" action="searchResults.php" method="post">
-                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"
-                    name="SearchQuery">
-                
-                <select class="form-control mr-sm-2" name="categoryInput">
-                    <option value="productName">Product Name</option>
-                    <option value="category">Category</option>
-                    <option value="subcategory">subcategory</option>
-                    <option value="manufacturer">Manufacturer</option>
-                </select>
+        <!-- Allow searching for products from the navbar -->
+        <form class="form-inline my-2 my-lg-0" action="searchResults.php" method="post">
+            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"
+                name="searchQuery">
 
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-            </form>
+            <select class="form-control mr-sm-2" name="categoryInput">
+                <option value="productName">Product Name</option>
+                <option value="category">Category</option>
+                <option value="subcategory">subcategory</option>
+                <option value="manufacturer">Manufacturer</option>
+            </select>
+
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form>
         </div>
     </nav>
 
-    <div class="container-fluid">
-        <?php foreach ($results as $result) {
-            echo $result['productName'];
-            echo "<br/>";
-            echo $result['productNumber'];
-            echo "<br/>";
-            echo $result['category'];
-            echo "<br/>";
-            echo $result['subcategory'];
-            echo "<br/>";
-            echo $result['manufacturer'];
-            echo "<br/>";
-            echo $result['numInStock'];
-            echo "<br/>";
-            echo $result['price'];
-            echo "<br/>";
-            echo $result['description'];
-            echo "<br/><br/><br/>";
-        } ?>
+    <!-- Jumbotron/Hero element : Features a random background image and a tagline for the company -->
+    <div class="jumbotron jumbotron-fluid musicJumbotron">
+        <div class="container">
+            <h1 class="jumboHeading">Search Results</h1>
+        </div>
+    </div>
 
+    <div class="container-fluid ml-2 mr-2">
+        <div class="row">
+            <?php foreach ($results as $product ) { ?>
+                    <!-- Create a card for each product -->
+                    <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2">
+                        <div class="card m-2">
+                            <img src="assets\images\productImages\resized\<?php echo $product['imagePath']; ?>"
+                                class="card-img-top"
+                                alt="Image of <?php echo $product['productName'] ?>">
+
+                            <div class="card-body">
+                                <h5 class="card-title"><?php echo $product['productName']; ?>
+                                </h5>
+
+                                <h6 class="card-subtitle text-muted mb-2">$<?php echo $product['price']; ?>
+                                </h6>
+
+                                <!-- <p class="card-text"><?php echo substr($product['description'], 0, 35) . "..."; ?>
+                                </p> -->
+
+                                <form action="addToCart.php" method="post" class= "mt-2">
+                                    <input type="hidden" name="productName" value="<?php echo $product['productName']; ?>">
+                                    <input type="hidden" name="price" value="<?php echo $product['price']; ?>">
+                                    <input type="hidden" name="quantity" value="1">
+
+                                    <button type="button" class="btn btn-primary mr-5" data-toggle="modal"
+                                    data-target="#<?php echo $product['productName']; ?>">
+                                    <i class="fas fa-expand-arrows-alt"></i>
+                                    </button>
+
+                                    <button type="submit" class="btn btn-success"><i class="fas fa-cart-plus"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Create the modal for each product  -->
+                    <!-- Clicking on the expand button will show more detailed product info, with a larger image if available -->
+                    <div class="modal fade"
+                        id="<?php echo $product['productName']; ?>"
+                        tabindex="-1" role="dialog"
+                        aria-labelledby="<?php echo $product['productName']; ?>Title"
+                        aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title"
+                                        id="<?php echo $product['productName']; ?>Title">
+                                        <?php echo $product['productName']; ?>
+                                    </h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <img src="assets\images\productImages\resized\<?php echo $product['imagePath']; ?>"
+                                        class="card-img-top"
+                                        alt="Image of <?php echo $product['productName'] ?>">
+
+                                    <h6 class="text-muted">$<?php echo $product['price']; ?>
+                                    </h6>
+
+                                    <p><?php echo $product['description']; ?>
+                                    </p>
+                                </div>
+                                <div class="modal-footer">
+                                    <form action="addToCart.php" method="post" class= "mt-2">
+                                        <input type="hidden" name="productName" value="<?php echo $product['productName']; ?>">
+                                        <input type="hidden" name="price" value="<?php echo $product['price']; ?>">
+                                        <input type="hidden" name="quantity" value="1">
+
+                                        <button type="button" class="btn btn-primary mr-5" data-toggle="modal"
+                                        data-target="#<?php echo $product['productName']; ?>">
+                                        <i class="fas fa-expand-arrows-alt"></i>
+                                        </button>
+
+                                        <button type="submit" class="btn btn-success"><i class="fas fa-cart-plus"></i></button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            <?php }?>
     </div>
 
     <!-- Bootstrap JavaScript Bundle CDN -->

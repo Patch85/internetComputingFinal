@@ -65,6 +65,10 @@
                             class="sr-only">(current)</span></a>
                 </li>
 
+                <li class="nav-item">
+                    <a class="nav-link" href="viewCart.php">Shopping Cart</a>
+                </li>
+
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account</a>
@@ -99,7 +103,7 @@
             <form class="form-inline my-2 my-lg-0" action="searchResults.php" method="post">
                 <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"
                     name="SearchQuery">
-                
+
                 <select class="form-control mr-sm-2" name="categoryInput">
                     <option value="productName">Product Name</option>
                     <option value="category">Category</option>
@@ -127,73 +131,84 @@
                 $statement -> execute();
                 $product = $statement->fetch(); // get the first row
                 while ($product != null) { ?>
-            <!-- Create a card for each product -->
-            <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2">
-                <div class="card m-2">
-                    <img src="assets\images\productImages\resized\<?php echo $product['imagePath']; ?>"
-                        class="card-img-top"
-                        alt="Image of <?php echo $product['productName'] ?>">
-
-                    <div class="card-body">
-                        <h5 class="card-title"><?php echo $product['productName']; ?>
-                        </h5>
-
-                        <h6 class="card-subtitle text-muted mb-2">$<?php echo $product['price']; ?>
-                        </h6>
-
-                        <!-- <p class="card-text"><?php echo substr($product['description'], 0, 35) . "..."; ?>
-                        </p> -->
-
-                        <div>
-                            <button type="button" class="btn btn-primary mr-5" data-toggle="modal"
-                                data-target="#<?php echo $product['productName']; ?>">
-                                <i class="fas fa-expand-arrows-alt"></i>
-                            </button>
-
-                            <a href="#" class="btn btn-success"><i class="fas fa-cart-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Create the modal for each product  -->
-            <!-- Clicking on the expand button will show more detailed product info, with a larger image if available -->
-            <div class="modal fade"
-                id="<?php echo $product['productName']; ?>"
-                tabindex="-1" role="dialog"
-                aria-labelledby="<?php echo $product['productName']; ?>Title"
-                aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title"
-                                id="<?php echo $product['productName']; ?>Title">
-                                <?php echo $product['productName']; ?>
-                            </h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
+                    <!-- Create a card for each product -->
+                    <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2">
+                        <div class="card m-2">
                             <img src="assets\images\productImages\resized\<?php echo $product['imagePath']; ?>"
                                 class="card-img-top"
                                 alt="Image of <?php echo $product['productName'] ?>">
 
-                            <h6 class="text-muted">$<?php echo $product['price']; ?>
-                            </h6>
+                            <div class="card-body">
+                                <h5 class="card-title"><?php echo $product['productName']; ?>
+                                </h5>
 
-                            <p><?php echo $product['description']; ?>
-                            </p>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <a href="#" class="btn btn-success"><i class="fas fa-cart-plus"></i></a>
+                                <h6 class="card-subtitle text-muted mb-2">$<?php echo $product['price']; ?>
+                                </h6>
+
+                                <form action="addToCart.php" method="post" class= "mt-2">
+                                    <input type="hidden" name="productName" value="<?php echo $product['productName']; ?>">
+                                    <input type="hidden" name="price" value="<?php echo $product['price']; ?>">
+                                    <input type="hidden" name="quantity" value="1">
+
+                                    <button type="button" class="btn btn-primary mr-5" data-toggle="modal"
+                                    data-target="#<?php echo $product['productName']; ?>">
+                                    <i class="fas fa-expand-arrows-alt"></i>
+                                    </button>
+
+                                    <button type="submit" class="btn btn-success"><i class="fas fa-cart-plus"></i></button>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <?php $product = $statement->fetch(); // get the next row
+                    <!-- Create the modal for each product  -->
+                    <!-- Clicking on the expand button will show more detailed product info, with a larger image if available -->
+                    <div class="modal fade"
+                        id="<?php echo $product['productName']; ?>"
+                        tabindex="-1" role="dialog"
+                        aria-labelledby="<?php echo $product['productName']; ?>Title"
+                        aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title"
+                                        id="<?php echo $product['productName']; ?>Title">
+                                        <?php echo $product['productName']; ?>
+                                    </h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <img src="assets\images\productImages\resized\<?php echo $product['imagePath']; ?>"
+                                        class="card-img-top"
+                                        alt="Image of <?php echo $product['productName'] ?>">
+
+                                    <h6 class="text-muted">$<?php echo $product['price']; ?>
+                                    </h6>
+
+                                    <p><?php echo $product['description']; ?>
+                                    </p>
+                                </div>
+                                <div class="modal-footer">
+                                    <form action="addToCart.php" method="post" class= "mt-2">
+                                        <input type="hidden" name="productName" value="<?php echo $product['productName']; ?>">
+                                        <input type="hidden" name="price" value="<?php echo $product['price']; ?>">
+                                        <input type="hidden" name="quantity" value="1">
+
+                                        <button type="button" class="btn btn-primary mr-5" data-toggle="modal"
+                                        data-target="#<?php echo $product['productName']; ?>">
+                                        <i class="fas fa-expand-arrows-alt"></i>
+                                        </button>
+
+                                        <button type="submit" class="btn btn-success"><i class="fas fa-cart-plus"></i></button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <?php $product = $statement->fetch(); // get the next row
                 }
             ?>
         </div>
