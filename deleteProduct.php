@@ -18,6 +18,7 @@
 
 $category = $_POST['category'];
 
+
 if (isset($_POST['product_id'])) {
   $productID = $_POST['product_id'];
 } else {
@@ -33,6 +34,7 @@ if ($productID != false) {
   $success = $statementDelete->execute();
   $statementDelete->closeCursor();
 }
+$word = "<strong> Product successfully deleted </strong>";
 echo $category;
 include('productListing.php');
 ?>
