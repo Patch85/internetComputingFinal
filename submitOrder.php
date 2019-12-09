@@ -32,14 +32,14 @@
         $time = $time->format("r");
 
         $query = "INSERT INTO orders
-            (accountNumber, forFirstName, forLastName, shipAddress1, shipAddress2, shipCity, shipState shipZip, comments)
+            (accountNumber, orderDate, forFirstName, forLastName, shipAddress1, shipAddress2, shipCity, shipState shipZip, comments)
             VALUES 
-            (:accountNumber,:forFirstName, :forLastName, :shipAddress1, :shipAddress2, :shipCity, :shipState, :shipZip, :comments)";
+            (:accountNumber, :orderDate, :forFirstName, :forLastName, :shipAddress1, :shipAddress2, :shipCity, :shipState, :shipZip, :comments)";
         
         $statement = $db->prepare($query);
 
         $statement->bindValue(':accountNumber', $_SESSION['acctNum']);
-        // $statement->bindValue(':orderDate', $time);
+        $statement->bindValue(':orderDate', $time);
         $statement->bindValue(':forFirstName', $_SESSION['shipping']['firstName']);
         $statement->bindValue(':forLastName', $_SESSION['shipping']['lastName']);
         $statement->bindValue(':shipAddress1', $_SESSION['shipping']['address1']);
@@ -56,36 +56,36 @@
         $statement->closeCursor();
 
         foreach ($_SESSION['cart'] as $item) {
-            if ($item['quantity'] > 0) {
-                $pName = $item['productName'];
-                $price = $item['price'];
-                $qty = $item['quantity'];
+            // if ($item['quantity'] > 0) {
+            $pName = $item['productName'];
+            $price = $item['price'];
+            $qty = $item['quantity'];
 
-                $selectQuery = "SELECT productNumber FROM products WHERE productName = :productName";
+            $selectQuery = "SELECT productNumber FROM products WHERE productName = :productName";
 
-                $statement = $db->prepare($selectQuery);
-                $statement->bindValue(':productName', $pName);
-                $statement->execute();
+            $statement = $db->prepare($selectQuery);
+            $statement->bindValue(':productName', $pName);
+            $statement->execute();
 
-                $pNum = $statement->fetchColumn();
+            $pNum = $statement->fetchColumn();
 
-                $statement->closeCursor();
+            $statement->closeCursor();
 
-                $insertQuery = "INSERT INTO order_items
+            $insertQuery = "INSERT INTO order_items
                         (orderNumber, productNumber, price, quantity)
                     VALUES
-                        (:orderNumber, :productNumber, :price, :quantity)";  
+                        (:orderNumber, :productNumber, :price, :quantity)";
 
-                $statement = $db->prepare($insertQuery);
+            $statement = $db->prepare($insertQuery);
 
-                $statement->bindValue(':orderNumber', $orderNumber);
-                $statement->bindValue(':productNumber', $pNum);
-                $statement->bindValue(':price', $price);
-                $statement->bindValue(':quantity', $qty);
+            $statement->bindValue(':orderNumber', $orderNumber);
+            $statement->bindValue(':productNumber', $pNum);
+            $statement->bindValue(':price', $price);
+            $statement->bindValue(':quantity', $qty);
 
-                $statement->execute();
-                $statement->closeCursor();
-            }
+            $statement->execute();
+            $statement->closeCursor();
+            // }
         }
     }
 ?>
@@ -194,8 +194,13 @@
     </div>
 
     <!-- Main Section of the page: Show 6 Featured Products as cards with brief descriptions -->
-    <div class="container-fluid">
+    <div class="container">
         <p>Order Number: <?php echo $orderNumber; ?> Confirmed</p>
+
+        <h3>Delivered to:</h3>
+        <?php foreach ($_SESSION['shipping'] as $key => $value) {
+    echo "<p>".$value."</p>";
+}?>
     </div>
 
     <!-- Bootstrap: jQuery, ajax & JavaScript Bundle CDNs -->

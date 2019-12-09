@@ -1,6 +1,11 @@
 <?php
     // Start a session
     session_start();
+    if ($_SESSION['userType'] != "employee") {
+        header("Location: index.php"); //Only managers should have access to adding products
+    }
+
+
     // Set initial variables
     $dsn = 'mysql:host=localhost;dbname=music';
     // musicman has global privileges for the music database
@@ -18,36 +23,38 @@
 
 
 if (!empty($category)) {
-  $queryProdcts = "SELECT *
+    $queryProdcts = "SELECT *
                    FROM products
                    WHERE category=:category";
-  $statementProducts = $db->prepare($queryProdcts);
-  $statementProducts->bindValue(':category', $category);
-  $statementProducts->execute();
-  $products = $statementProducts->fetchAll();
-  $statementProducts->closeCursor();
-  // code...
+    $statementProducts = $db->prepare($queryProdcts);
+    $statementProducts->bindValue(':category', $category);
+    $statementProducts->execute();
+    $products = $statementProducts->fetchAll();
+    $statementProducts->closeCursor();
+// code...
 } else {
-  $queryProdcts = "SELECT *
+    $queryProdcts = "SELECT *
                    FROM products";
-  $statementProducts = $db->prepare($queryProdcts);
-  $statementProducts->execute();
-  $products = $statementProducts->fetchAll();
-  $statementProducts->closeCursor();
-  // code...
+    $statementProducts = $db->prepare($queryProdcts);
+    $statementProducts->execute();
+    $products = $statementProducts->fetchAll();
+    $statementProducts->closeCursor();
+    // code...
 }
 
 
 ?>
 
 <html lang="en" dir="ltr">
-  <head>
-    <meta charset="utf-8">
-    <title>Product Listing</title>
-  </head>
-  <body>
-    Display a specific category:
-    <form action="empCategoryDisplay.php" method="post">
+
+<head>
+  <meta charset="utf-8">
+  <title>Product Listing</title>
+</head>
+
+<body>
+  Display a specific category:
+  <form action="empCategoryDisplay.php" method="post">
     <select name="category">
       <option value="">-</option>
       <option value="String">String</option>
@@ -57,23 +64,27 @@ if (!empty($category)) {
       <option value="Percussion">Percussion</option>
     </select>
     <input type="submit" value="Submit">
-    </form>
+  </form>
 
-    <caption>Product Listing</caption>
-    <table border="1">
-      <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Price</th>
-      </tr>
-      <?php foreach ($products as $product) { ?>
-      <tr>
-        <td><?php echo $product['productNumber']; ?></td>
-        <td><?php echo $product['productName']; ?></td>
-        <td><?php echo $product['price']; ?></td>
+  <caption>Product Listing</caption>
+  <table border="1">
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Price</th>
+    </tr>
+    <?php foreach ($products as $product) { ?>
+    <tr>
+      <td><?php echo $product['productNumber']; ?>
+      </td>
+      <td><?php echo $product['productName']; ?>
+      </td>
+      <td><?php echo $product['price']; ?>
+      </td>
 
-      </tr>
+    </tr>
     <?php } ?>
-    </table>
-  </body>
+  </table>
+</body>
+
 </html>
