@@ -98,9 +98,28 @@
 
                         <div class="dropdown-divider"></div>
 
-                        <a class="dropdown-item  disabled" href="#">Order History</a>
+                        <a class="dropdown-item" href="CustomerReceipts.php">Order History</a>
 
                         <div class="dropdown-divider"></div>
+
+                        <?php
+                        if (isset($_SESSION['userType'])) {
+                            // If the user is logged in and is a manager, display appropriate admin links
+                            if ($_SESSION['userType'] == "manager") {
+                                echo '<a class="dropdown-item" href="addProductForm.php">Add New Product</a>
+                                <div class="dropdown-divider"></div>';
+
+                                echo' <a class="dropdown-item" href="productListing.php">Update Inventory / Delete Product</a>
+                                <div class="dropdown-divider"></div>';
+
+                                echo' <a class="dropdown-item disabled" href="#">View/Edit Users</a>
+                                <div class="dropdown-divider"></div>';
+                            } elseif ($_SESSION['userType'] == "employee") {
+                                // If the user is logged in and is an employee, display appropriate admin links
+                                echo '<a class="dropdown-item" href="empProductListing.php">View Inventory</a>
+                                <div class="dropdown-divider"></div>';
+                            }
+                        }?>
 
                         <a class="dropdown-item " href="logout.php">Log Out</a>
                     </div>
@@ -139,17 +158,17 @@
         <!-- Randomly select 6 products to feature -->
         <div class="row">
             <?php for ($i=0; $i < 6; $i++) {
-    // Generate a random number between 1 and 25
-    $productNumber = mt_rand(1, 25);
+                            // Generate a random number between 1 and 25
+                            $productNumber = mt_rand(1, 25);
 
-    // Query the database and retrieve the data for the product with that productNumber
-    $query = "SELECT * FROM products WHERE productNumber = :productNumber";
-    $statement = $db->prepare($query);
-    $statement->bindValue(":productNumber", $productNumber);
-    $statement->execute();
-    $featuredProducts[] = $statement->fetch();
-    $statement->closeCursor();
-} ?>
+                            // Query the database and retrieve the data for the product with that productNumber
+                            $query = "SELECT * FROM products WHERE productNumber = :productNumber";
+                            $statement = $db->prepare($query);
+                            $statement->bindValue(":productNumber", $productNumber);
+                            $statement->execute();
+                            $featuredProducts[] = $statement->fetch();
+                            $statement->closeCursor();
+                        } ?>
 
             <?php
                 foreach ($featuredProducts as $product) { ?>

@@ -1,6 +1,4 @@
 <?php
-    // Start a session
-    session_start();
     // Set initial variables
     $dsn = 'mysql:host=localhost;dbname=music';
     // musicman has global privileges for the music database
@@ -19,10 +17,10 @@
 $productID = $_POST['product_id'];
 $newStock = filter_input(INPUT_POST, 'stock', FILTER_VALIDATE_INT);
 
-if ($newStock == NULL || $newStock == FALSE) {
-  echo "<strong>Invalid input, please try again</strong>";
-  include('updateStockForm.php');
-  exit;
+if ($newStock == null || $newStock == false) {
+    echo "<strong>Invalid input, please try again</strong>";
+    include('updateStockForm.php');
+    exit;
 }
 
 
@@ -37,4 +35,3 @@ $statementInsert->closeCursor();
 
 $word = "<strong>Successful update to product</strong> <br />";
 include('productListing.php');
-?>

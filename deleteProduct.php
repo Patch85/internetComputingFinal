@@ -1,6 +1,4 @@
 <?php
-    // Start a session
-    session_start();
     // Set initial variables
     $dsn = 'mysql:host=localhost;dbname=music';
     // musicman has global privileges for the music database
@@ -15,9 +13,6 @@
         echo " <p>An error occurred while connecting to the database: $error_message</p>";
         die();
     }
-
-$category = $_POST['category'];
-
 
 if (isset($_POST['product_id'])) {
   $productID = $_POST['product_id'];
@@ -35,6 +30,6 @@ if ($productID != false) {
   $statementDelete->closeCursor();
 }
 $word = "<strong> Product successfully deleted </strong>";
-echo $category;
+
 include('productListing.php');
 ?>

@@ -5,7 +5,7 @@
     // Remove all session variables
     session_unset();
     // Destroy the session
-    session_destroy();    
+    session_destroy();
 ?>
 
 <!DOCTYPE html>
@@ -52,9 +52,10 @@
                 </li>
 
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account</a>
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account</a>
 
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">                        
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="login.php">Log In</a>
 
                         <div class="dropdown-divider"></div>
@@ -63,37 +64,56 @@
 
                         <div class="dropdown-divider"></div>
 
-                        <a class="dropdown-item" href="customerProfile.php">View/Update Profile<</a>
-
-                        <div class="dropdown-divider"></div>
-
-                        <a class="dropdown-item " href="changePassword.php">Change Password</a>
-
-                        <div class="dropdown-divider"></div>
-
-                        <a class="dropdown-item  disabled" href="#">Order History</a>
-
-                        <div class="dropdown-divider"></div>
-
-                        <a class="dropdown-item active" href="logout.php">Log Out<span class="sr-only">(current)</span></a>
+                        <a class="dropdown-item" href="customerProfile.php">View/Update Profile<</a> <div
+                                class="dropdown-divider">
                     </div>
-                </li>
-            </ul>
 
-            <!-- Allow searching for products from the navbar -->
-            <form class="form-inline my-2 my-lg-0" action="searchResults.php" method="post">
-                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"
-                    name="SearchQuery">
-                
-                <select class="form-control mr-sm-2" name="categoryInput">
-                    <option value="productName">Product Name</option>
-                    <option value="category">Category</option>
-                    <option value="subcategory">subcategory</option>
-                    <option value="manufacturer">Manufacturer</option>
-                </select>
+                    <a class="dropdown-item " href="changePassword.php">Change Password</a>
 
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-            </form>
+                    <div class="dropdown-divider"></div>
+
+                    <a class="dropdown-item" href="CustomerReceipts.php">Order History</a>
+
+                    <div class="dropdown-divider"></div>
+
+                    <?php
+                        if (isset($_SESSION['userType'])) {
+                            // If the user is logged in and is a manager, display appropriate admin links
+                            if ($_SESSION['userType'] == "manager") {
+                                echo '<a class="dropdown-item" href="addProductForm.php">Add New Product</a>
+                                <div class="dropdown-divider"></div>';
+
+                                echo' <a class="dropdown-item" href="productListing.php">Update Inventory / Delete Product</a>
+                                <div class="dropdown-divider"></div>';
+
+                                echo' <a class="dropdown-item disabled" href="#">View/Edit Users</a>
+                                <div class="dropdown-divider"></div>';
+                            } elseif ($_SESSION['userType'] == "employee") {
+                                // If the user is logged in and is an employee, display appropriate admin links
+                                echo '<a class="dropdown-item" href="empProductListing.php">View Inventory</a>
+                                <div class="dropdown-divider"></div>';
+                            }
+                        }?>
+
+                    <a class="dropdown-item active" href="logout.php">Log Out<span class="sr-only">(current)</span></a>
+        </div>
+        </li>
+        </ul>
+
+        <!-- Allow searching for products from the navbar -->
+        <form class="form-inline my-2 my-lg-0" action="searchResults.php" method="post">
+            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"
+                name="SearchQuery">
+
+            <select class="form-control mr-sm-2" name="categoryInput">
+                <option value="productName">Product Name</option>
+                <option value="category">Category</option>
+                <option value="subcategory">subcategory</option>
+                <option value="manufacturer">Manufacturer</option>
+            </select>
+
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form>
         </div>
     </nav>
 
@@ -105,8 +125,8 @@
         </div>
     </div>
 
-        <!-- Bootstrap JavaScript Bundle CDN -->
-        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    <!-- Bootstrap JavaScript Bundle CDN -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"

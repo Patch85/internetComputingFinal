@@ -16,44 +16,24 @@
         die();
     }
 
-if (isset($_POST['acntNum'])) {
-  $queryGetOrderNumbers = "SELECT *
-                           FROM orders
-                           WHERE accountNumber=".$_POST['acntNum'];
-  $statementGetOrderNums = $db->prepare($queryGetOrderNumbers);
-  $statementGetOrderNums->execute();
-  $orderNums = $statementGetOrderNums->fetchall();
-  $statementGetOrderNums->closeCursor();
-} else {
-  $queryGetOrderNumbers = "SELECT *
-                           FROM orders";
-  $statementGetOrderNums = $db->prepare($queryGetOrderNumbers);
-  $statementGetOrderNums->execute();
-  $orderNums = $statementGetOrderNums->fetchall();
-  $statementGetOrderNums->closeCursor();
-}
-
-/*
-if (!empty($acntNumber)) {
-  $queryGetOrderNumbers = "SELECT *
-                           FROM orders
-                           WHERE accountNumber=".$acntNumber;
-  $statementGetOrderNums = $db->prepare($queryGetOrderNumbers);
-  $statementGetOrderNums->execute();
-  $orderNums = $statementGetOrderNums->fetchall();
-  $statementGetOrderNums->closeCursor();
-
-} else {
-$queryGetOrderNumbers = "SELECT *
-                         FROM orders";
-$statementGetOrderNums = $db->prepare($queryGetOrderNumbers);
-$statementGetOrderNums->execute();
-$orderNums = $statementGetOrderNums->fetchall();
-$statementGetOrderNums->closeCursor();
- */
-
+    if (!isset($_SESSION['userType'])) {
+        // if user is not logged in, redirect to login
+        header("Location: ./login.php");
+    } elseif ($_SESSION['userType'] == "customer") {
+        // If user is a customer, redirect to Customer view for order history
+        header("Location: ./CustomerReceipts.php");
+    } elseif ($_SESSION['userType'] == "manager" || $_SESSION['userType'] == "employee") {
+        // If user is a manager or employee query for complete order history
+        $queryGetOrderNumbers = "SELECT *
+                                FROM orders";
+        $statementGetOrderNums = $db->prepare($queryGetOrderNumbers);
+        $statementGetOrderNums->execute();
+        $orderNums = $statementGetOrderNums->fetchall();
+        $statementGetOrderNums->closeCursor();
+    }
 ?>
 <html lang="en" dir="ltr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -87,8 +67,8 @@ $statementGetOrderNums->closeCursor();
         <!-- Provide Nav links in a List  -->
         <div class="collapse navbar-collapse" id="navLinks">
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                    <a class="nav-link" href="index.php">Home <span class="sr-only">(current)</span></a>
+                <li class="nav-item">
+                    <a class="nav-link" href="index.php">Home</a>
                 </li>
 
                 <li class="nav-item">
@@ -120,9 +100,29 @@ $statementGetOrderNums->closeCursor();
 
                         <div class="dropdown-divider"></div>
 
-                        <a class="dropdown-item  disabled" href="#">Order History</a>
+                        <a class="dropdown-item active" href="CustomerReceipts.php">Order History<span
+                                class="sr-only">(current)</span></a>
 
                         <div class="dropdown-divider"></div>
+
+                        <?php
+                        if (isset($_SESSION['userType'])) {
+                            // If the user is logged in and is a manager, display appropriate admin links
+                            if ($_SESSION['userType'] == "manager") {
+                                echo '<a class="dropdown-item" href="addProductForm.php">Add New Product</a>
+                                <div class="dropdown-divider"></div>';
+
+                                echo' <a class="dropdown-item" href="productListing.php">Update Inventory / Delete Product</a>
+                                <div class="dropdown-divider"></div>';
+
+                                echo' <a class="dropdown-item disabled" href="#">View/Edit Users</a>
+                                <div class="dropdown-divider"></div>';
+                            } elseif ($_SESSION['userType'] == "employee") {
+                                // If the user is logged in and is an employee, display appropriate admin links
+                                echo '<a class="dropdown-item" href="empProductListing.php">View Inventory</a>
+                                <div class="dropdown-divider"></div>';
+                            }
+                        }?>
 
                         <a class="dropdown-item " href="logout.php">Log Out</a>
                     </div>
@@ -149,50 +149,74 @@ $statementGetOrderNums->closeCursor();
     <!-- Jumbotron/Hero element : Features a random background image and a tagline for the company -->
     <div class="jumbotron jumbotron-fluid musicJumbotron">
         <div class="container">
-            <h1 class="jumboHeading">DDM</h1>
-            <h2 class="jumboTagline">The Only Place for all Your Musical Needs</h2>
+            <h1 class="jumboHeading">Admin: Order History</h1>
+            <h2 class="jumboTagline"><?php echo $_SESSION['userName'].": ".$_SESSION['userType']; ?>
+                View
+            </h2>
         </div>
     </div>
 
-    <!-- Main Section of the page: Show 6 Featured Products as cards with brief descriptions -->
+    <!-- Display A Complete Order History for Manager/Employee -->
     <div class="container">
 
-    Enter a number to view a specific account: <input type="text" name="acntNum">
-    <input type="submit" value="Go" class="btn btn-success">
-    </form>
-    <br>
-    <table class="table table-sm">
-      <thead class="thead-dark">
-      <tr >
-        <th scope="col">Order number</th>
-        <th scope="col">Account number</th>
-        <th scope="col">Product Number</th>
-        <th scope="col">Price</th>
-        <th scope="col">Quantity</th>
-      </tr>
-    </thead>
 
-      <?php foreach($orderNums as $orderNum) {
-        $QueryGetOrders = "SELECT *
-                           FROM order_items
-                           WHERE orderNumber=".$orderNum['orderNumber'];
-        $statementGetOrders = $db->prepare($QueryGetOrders);
-        $statementGetOrders->execute();
-        $Orders = $statementGetOrders->fetchall();
-        $statementGetOrders->closeCursor();
+        <?php foreach ($orderNums as $orderNum) {
+    $QueryGetOrders = "SELECT * FROM order_items WHERE orderNumber = :orderNumber";
+    $statementGetOrders = $db->prepare($QueryGetOrders);
+    $statementGetOrders->bindValue(":orderNumber", $orderNum['orderNumber']);
+    $statementGetOrders->execute();
+    $Orders = $statementGetOrders->fetchall();
+    $statementGetOrders->closeCursor(); ?>
 
-        foreach($Orders as $Order) {
-         ?>
-      <tr>
-        <td> <?php echo $orderNum['orderNumber']; ?> </td>
-        <td> <?php echo $orderNum['accountNumber']; ?> </td>
-        <td> <?php echo $Order['productNumber']; ?> </td>
-        <td> <?php echo $Order['price']; ?> </td>
-        <td> <?php echo $Order['quantity']; ?> </td>
-      </tr>
-    <?php }
-        } ?>
-    </table>
+        <h4>Order # <?php  echo $orderNum['orderNumber']; ?>
+        </h4>
+        <h5>Account # <?php echo $orderNum['accountNumber']; ?>
+        </h5>
+        <h6>Date: <?php echo $orderNum['orderDate']; ?>
+        </h6>
+        <table class="table table-sm">
 
-  </body>
+            <tr class="thead-dark">
+                <th>Product Name</th>
+                <th>Price</th>
+                <th>Quantity</th>
+            </tr>
+
+            <?php foreach ($Orders as $Order) {
+        $nameQuery = "SELECT productName FROM products WHERE productNumber = :productNumber";
+        $statement = $db->prepare($nameQuery);
+        $statement->bindValue(":productNumber", $Order['productNumber']);
+        $statement->execute();
+        $pName = $statement->fetch();
+        $prodName = $pName['productName'];
+        $statement->closeCursor(); ?>
+
+            <tr>
+                <td> <?php echo $prodName; ?>
+                </td>
+                <td> $<?php echo $Order['price']; ?>
+                </td>
+                <td> <?php echo $Order['quantity']; ?>
+                </td>
+            </tr>
+
+            <?php
+    } ?>
+        </table> <br> <br>
+        <?php
+} ?>
+
+        <!-- Bootstrap: jQuery, ajax & JavaScript Bundle CDNs -->
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+        </script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+        </script>
+
+</body>
+
 </html>

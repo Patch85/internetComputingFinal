@@ -1,6 +1,4 @@
 <?php
-    // Start a session
-    session_start();
     // Set initial variables
     $dsn = 'mysql:host=localhost;dbname=music';
     // musicman has global privileges for the music database
@@ -19,4 +17,3 @@
 $category = $_POST['category'];
 
 include('empProductListing.php');
-?>

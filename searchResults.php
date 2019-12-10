@@ -33,22 +33,22 @@
             FROM products
             WHERE productName
             LIKE \"%".$SearchTerm."%\"";
-        } elseif ($category == "category"){
+        } elseif ($category == "category") {
             $SearchQuery = "SELECT *
             FROM products
             WHERE category
             LIKE \"%".$SearchTerm."%\"";
-        } elseif( $category == "subcategory") {
+        } elseif ($category == "subcategory") {
             $SearchQuery = "SELECT *
             FROM products
             WHERE subcategory
             LIKE \"%".$SearchTerm."%\"";
-        } else{
+        } else {
             $SearchQuery = "SELECT *
             FROM products
             WHERE manufacturer
             LIKE \"%".$SearchTerm."%\"";
-        }        
+        }
         // Prepare and execute the query, assinging the results to an array
         $statementSearch = $db->prepare($SearchQuery);
         $statementSearch->execute();
@@ -125,14 +125,33 @@
 
                     <div class="dropdown-divider"></div>
 
-                    <a class="dropdown-item  disabled" href="#">Order History</a>
+                    <a class="dropdown-item" href="CustomerReceipts.php">Order History</a>
 
                     <div class="dropdown-divider"></div>
+
+                    <?php
+                        if (isset($_SESSION['userType'])) {
+                            // If the user is logged in and is a manager, display appropriate admin links
+                            if ($_SESSION['userType'] == "manager") {
+                                echo '<a class="dropdown-item" href="addProductForm.php">Add New Product</a>
+                                <div class="dropdown-divider"></div>';
+
+                                echo' <a class="dropdown-item" href="productListing.php">Update Inventory / Delete Product</a>
+                                <div class="dropdown-divider"></div>';
+
+                                echo' <a class="dropdown-item disabled" href="#">View/Edit Users</a>
+                                <div class="dropdown-divider"></div>';
+                            } elseif ($_SESSION['userType'] == "employee") {
+                                // If the user is logged in and is an employee, display appropriate admin links
+                                echo '<a class="dropdown-item" href="empProductListing.php">View Inventory</a>
+                                <div class="dropdown-divider"></div>';
+                            }
+                        }?>
 
                     <a class="dropdown-item" href="logout.php">Log Out</a>
                 </li>
             </ul>
-        </div>       
+        </div>
 
         <!-- Allow searching for products from the navbar -->
         <form class="form-inline my-2 my-lg-0" action="searchResults.php" method="post">
@@ -160,99 +179,103 @@
 
     <div class="container-fluid ml-2 mr-2">
         <div class="row">
-            <?php foreach ($results as $product ) { ?>
-                    <!-- Create a card for each product -->
-                    <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2">
-                        <div class="card m-2">
+            <?php foreach ($results as $product) { ?>
+            <!-- Create a card for each product -->
+            <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2">
+                <div class="card m-2">
+                    <img src="assets\images\productImages\resized\<?php echo $product['imagePath']; ?>"
+                        class="card-img-top"
+                        alt="Image of <?php echo $product['productName'] ?>">
+
+                    <div class="card-body">
+                        <h5 class="card-title"><?php echo $product['productName']; ?>
+                        </h5>
+
+                        <h6 class="card-subtitle text-muted mb-2">$<?php echo $product['price']; ?>
+                        </h6>
+
+                        <!-- <p class="card-text"><?php echo substr($product['description'], 0, 35) . "..."; ?>
+                        </p> -->
+
+                        <form action="addToCart.php" method="post" class="mt-2">
+                            <input type="hidden" name="productName"
+                                value="<?php echo $product['productName']; ?>">
+                            <input type="hidden" name="price"
+                                value="<?php echo $product['price']; ?>">
+                            <input type="hidden" name="quantity" value="1">
+
+                            <button type="button" class="btn btn-primary mr-5" data-toggle="modal"
+                                data-target="#<?php echo $product['productName']; ?>">
+                                <i class="fas fa-expand-arrows-alt"></i>
+                            </button>
+
+                            <button type="submit" class="btn btn-success"><i class="fas fa-cart-plus"></i></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Create the modal for each product  -->
+            <!-- Clicking on the expand button will show more detailed product info, with a larger image if available -->
+            <div class="modal fade"
+                id="<?php echo $product['productName']; ?>"
+                tabindex="-1" role="dialog"
+                aria-labelledby="<?php echo $product['productName']; ?>Title"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title"
+                                id="<?php echo $product['productName']; ?>Title">
+                                <?php echo $product['productName']; ?>
+                            </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
                             <img src="assets\images\productImages\resized\<?php echo $product['imagePath']; ?>"
                                 class="card-img-top"
                                 alt="Image of <?php echo $product['productName'] ?>">
 
-                            <div class="card-body">
-                                <h5 class="card-title"><?php echo $product['productName']; ?>
-                                </h5>
+                            <h6 class="text-muted">$<?php echo $product['price']; ?>
+                            </h6>
 
-                                <h6 class="card-subtitle text-muted mb-2">$<?php echo $product['price']; ?>
-                                </h6>
+                            <p><?php echo $product['description']; ?>
+                            </p>
+                        </div>
+                        <div class="modal-footer">
+                            <form action="addToCart.php" method="post" class="mt-2">
+                                <input type="hidden" name="productName"
+                                    value="<?php echo $product['productName']; ?>">
+                                <input type="hidden" name="price"
+                                    value="<?php echo $product['price']; ?>">
+                                <input type="hidden" name="quantity" value="1">
 
-                                <!-- <p class="card-text"><?php echo substr($product['description'], 0, 35) . "..."; ?>
-                                </p> -->
-
-                                <form action="addToCart.php" method="post" class= "mt-2">
-                                    <input type="hidden" name="productName" value="<?php echo $product['productName']; ?>">
-                                    <input type="hidden" name="price" value="<?php echo $product['price']; ?>">
-                                    <input type="hidden" name="quantity" value="1">
-
-                                    <button type="button" class="btn btn-primary mr-5" data-toggle="modal"
+                                <button type="button" class="btn btn-primary mr-5" data-toggle="modal"
                                     data-target="#<?php echo $product['productName']; ?>">
                                     <i class="fas fa-expand-arrows-alt"></i>
-                                    </button>
+                                </button>
 
-                                    <button type="submit" class="btn btn-success"><i class="fas fa-cart-plus"></i></button>
-                                </form>
-                            </div>
+                                <button type="submit" class="btn btn-success"><i class="fas fa-cart-plus"></i></button>
+                            </form>
                         </div>
                     </div>
-
-                    <!-- Create the modal for each product  -->
-                    <!-- Clicking on the expand button will show more detailed product info, with a larger image if available -->
-                    <div class="modal fade"
-                        id="<?php echo $product['productName']; ?>"
-                        tabindex="-1" role="dialog"
-                        aria-labelledby="<?php echo $product['productName']; ?>Title"
-                        aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title"
-                                        id="<?php echo $product['productName']; ?>Title">
-                                        <?php echo $product['productName']; ?>
-                                    </h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    <img src="assets\images\productImages\resized\<?php echo $product['imagePath']; ?>"
-                                        class="card-img-top"
-                                        alt="Image of <?php echo $product['productName'] ?>">
-
-                                    <h6 class="text-muted">$<?php echo $product['price']; ?>
-                                    </h6>
-
-                                    <p><?php echo $product['description']; ?>
-                                    </p>
-                                </div>
-                                <div class="modal-footer">
-                                    <form action="addToCart.php" method="post" class= "mt-2">
-                                        <input type="hidden" name="productName" value="<?php echo $product['productName']; ?>">
-                                        <input type="hidden" name="price" value="<?php echo $product['price']; ?>">
-                                        <input type="hidden" name="quantity" value="1">
-
-                                        <button type="button" class="btn btn-primary mr-5" data-toggle="modal"
-                                        data-target="#<?php echo $product['productName']; ?>">
-                                        <i class="fas fa-expand-arrows-alt"></i>
-                                        </button>
-
-                                        <button type="submit" class="btn btn-success"><i class="fas fa-cart-plus"></i></button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                </div>
+            </div>
             <?php }?>
-    </div>
+        </div>
 
-    <!-- Bootstrap JavaScript Bundle CDN -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
-    </script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
-    </script>
+        <!-- Bootstrap JavaScript Bundle CDN -->
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+        </script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+        </script>
 </body>
 
 </html>

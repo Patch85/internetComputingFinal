@@ -28,26 +28,36 @@
     // If the user has progessed through checkout, and confirmed their order, continue to
     // insert the order into the database
     if (isset($_SESSION['shipping']['firstName'])) {
-        $time = new DateTime("now");
-        $time = $time->format("r");
+        // Set variables for insert
+        $acctNum =  intval($_SESSION['acctNum']);
+        $forFirstName = $_SESSION['shipping']['firstName'];
+        $forLastName = $_SESSION['shipping']['lastName'];
+        $shipAddress1 = $_SESSION['shipping']['address1'];
+        $shipAddress2 = $_SESSION['shipping']['address2'];
+        $shipCity = $_SESSION['shipping']['city'];
+        $shipState = $_SESSION['shipping']['state'];
+        $shipZip = $_SESSION['shipping']['zip'];
+        $comments =  $_SESSION['shipping']['comments'];
+        $time = new DateTime();
+        $time = $time->format('Y-m-d');
 
         $query = "INSERT INTO orders
-            (accountNumber, orderDate, forFirstName, forLastName, shipAddress1, shipAddress2, shipCity, shipState shipZip, comments)
+            (accountNumber, orderDate, forFirstName, forLastName, shipAddress1, shipAddress2, shipCity, shipState, shipZip, comments)
             VALUES 
             (:accountNumber, :orderDate, :forFirstName, :forLastName, :shipAddress1, :shipAddress2, :shipCity, :shipState, :shipZip, :comments)";
         
         $statement = $db->prepare($query);
 
-        $statement->bindValue(':accountNumber', $_SESSION['acctNum']);
+        $statement->bindValue(':accountNumber', $acctNum);
         $statement->bindValue(':orderDate', $time);
-        $statement->bindValue(':forFirstName', $_SESSION['shipping']['firstName']);
-        $statement->bindValue(':forLastName', $_SESSION['shipping']['lastName']);
-        $statement->bindValue(':shipAddress1', $_SESSION['shipping']['address1']);
-        $statement->bindValue(':shipAddress2', $_SESSION['shipping']['address2']);
-        $statement->bindValue(':shipCity', $_SESSION['shipping']['city']);
-        $statement->bindValue(':shipState', $_SESSION['shipping']['state']);
-        $statement->bindValue(':shipZip', $_SESSION['shipping']['zip']);
-        $statement->bindValue(':comments', $_SESSION['shipping']['comments']);
+        $statement->bindValue(':forFirstName', $forFirstName);
+        $statement->bindValue(':forLastName', $forLastName);
+        $statement->bindValue(':shipAddress1', $shipAddress1);
+        $statement->bindValue(':shipAddress2', $shipAddress2);
+        $statement->bindValue(':shipCity', $shipCity);
+        $statement->bindValue(':shipState', $shipState);
+        $statement->bindValue(':shipZip', $shipZip);
+        $statement->bindValue(':comments', $comments);
 
         $statement->execute();
 
@@ -56,38 +66,52 @@
         $statement->closeCursor();
 
         foreach ($_SESSION['cart'] as $item) {
-            // if ($item['quantity'] > 0) {
-            $pName = $item['productName'];
-            $price = $item['price'];
-            $qty = $item['quantity'];
+            if ($item['quantity'] > 0) {
+                $pName = $item['productName'];
+                $price = $item['price'];
+                $qty = $item['quantity'];
 
-            $selectQuery = "SELECT productNumber FROM products WHERE productName = :productName";
+                $selectQuery = "SELECT productNumber, numInStock FROM products WHERE productName = :productName";
 
-            $statement = $db->prepare($selectQuery);
-            $statement->bindValue(':productName', $pName);
-            $statement->execute();
+                $statement = $db->prepare($selectQuery);
+                $statement->bindValue(':productName', $pName);
+                $statement->execute();
+                $productInfo = $statement->fetch();
 
-            $pNum = $statement->fetchColumn();
+                $pNum = $productInfo['productNumber'];
+                $inStock = $productInfo['numInStock'];
 
-            $statement->closeCursor();
+                $statement->closeCursor();
 
-            $insertQuery = "INSERT INTO order_items
-                        (orderNumber, productNumber, price, quantity)
-                    VALUES
-                        (:orderNumber, :productNumber, :price, :quantity)";
+                $insertQuery = "INSERT INTO order_items
+                            (orderNumber, productNumber, price, quantity)
+                        VALUES
+                            (:orderNumber, :productNumber, :price, :quantity)";
 
-            $statement = $db->prepare($insertQuery);
+                $statement = $db->prepare($insertQuery);
 
-            $statement->bindValue(':orderNumber', $orderNumber);
-            $statement->bindValue(':productNumber', $pNum);
-            $statement->bindValue(':price', $price);
-            $statement->bindValue(':quantity', $qty);
+                $statement->bindValue(':orderNumber', $orderNumber);
+                $statement->bindValue(':productNumber', $pNum);
+                $statement->bindValue(':price', $price);
+                $statement->bindValue(':quantity', $qty);
 
-            $statement->execute();
-            $statement->closeCursor();
-            // }
+                $statement->execute();
+                $statement->closeCursor();
+
+                // Decrease the inventory accordingly
+                $inventoryQuery = "UPDATE products 
+                    SET numInStock = :numInStock 
+                    WHERE productNumber = :productNumber";
+                $statement = $db->prepare($inventoryQuery);
+                $statement->bindValue(':numInStock', intVal($inStock - $qty) );
+                $statement->bindValue(':productNumber', $pNum);
+                $statement->execute();
+                $statement->closeCursor();
+            }
         }
     }
+    // Unset the contents of the shopping cart
+    unset($_SESSION['cart']);
 ?>
 
 <!DOCTYPE html>
@@ -159,9 +183,27 @@
 
                         <div class="dropdown-divider"></div>
 
-                        <a class="dropdown-item  disabled" href="#">Order History</a>
+                        <a class="dropdown-item" href="CustomerReceipts.php">Order History</a>
 
                         <div class="dropdown-divider"></div>
+                        <?php
+                        if (isset($_SESSION['userType'])) {
+                            // If the user is logged in and is a manager, display appropriate admin links
+                            if ($_SESSION['userType'] == "manager") {
+                                echo '<a class="dropdown-item" href="addProductForm.php">Add New Product</a>
+                                <div class="dropdown-divider"></div>';
+
+                                echo' <a class="dropdown-item" href="productListing.php">Update Inventory / Delete Product</a>
+                                <div class="dropdown-divider"></div>';
+
+                                echo' <a class="dropdown-item disabled" href="#">View/Edit Users</a>
+                                <div class="dropdown-divider"></div>';
+                            } elseif ($_SESSION['userType'] == "employee") {
+                                // If the user is logged in and is an employee, display appropriate admin links
+                                echo '<a class="dropdown-item" href="empProductListing.php">View Inventory</a>
+                                <div class="dropdown-divider"></div>';
+                            }
+                        }?>
 
                         <a class="dropdown-item " href="logout.php">Log Out</a>
                     </div>
@@ -195,12 +237,8 @@
 
     <!-- Main Section of the page: Show 6 Featured Products as cards with brief descriptions -->
     <div class="container">
-        <p>Order Number: <?php echo $orderNumber; ?> Confirmed</p>
-
-        <h3>Delivered to:</h3>
-        <?php foreach ($_SESSION['shipping'] as $key => $value) {
-    echo "<p>".$value."</p>";
-}?>
+        <h4>Your Order Number Is: <?php echo $orderNumber; ?>
+        </h4>
     </div>
 
     <!-- Bootstrap: jQuery, ajax & JavaScript Bundle CDNs -->

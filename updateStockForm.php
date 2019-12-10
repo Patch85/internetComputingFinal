@@ -15,39 +15,47 @@
         echo " <p>An error occurred while connecting to the database: $error_message</p>";
         die();
     }
-$productID = $_POST['product_id'];
 
-$queryRetrieval = "SELECT *
-                   FROM products
-                   WHERE productNumber=:productID";
-$statementRetrieval = $db->prepare($queryRetrieval);
-$statementRetrieval->bindValue(':productID', $productID);
-$statementRetrieval->execute();
-$product = $statementRetrieval->fetch();
-$statementRetrieval->closeCursor();
+    if(!isset($_POST['product_id'])){
+        header("Location: ./productListing.php ");
+    } else{
+        $productID = $_POST['product_id'];
+    }
+    
+
+    $queryRetrieval = "SELECT *
+                    FROM products
+                    WHERE productNumber=:productID";
+    $statementRetrieval = $db->prepare($queryRetrieval);
+    $statementRetrieval->bindValue(':productID', $productID);
+    $statementRetrieval->execute();
+    $product = $statementRetrieval->fetch();
+    $statementRetrieval->closeCursor();
 
 ?>
 
 <html lang="en" dir="ltr">
-  <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-      <title>DDM, Inc. Music Shop</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-      <!-- Bootstrap CSS CDN -->
-      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>DDM, Inc. Music Shop</title>
+
+    <!-- Bootstrap CSS CDN -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
 
-      <!-- Add the custom CSS on top of Bootstrap -->
-      <link rel="stylesheet" href="assets\styles\custom.css">
+    <!-- Add the custom CSS on top of Bootstrap -->
+    <link rel="stylesheet" href="assets\styles\custom.css">
 
-      <!-- FontAwesome -->
-      <script src="https://kit.fontawesome.com/69d8b1cf3c.js" crossorigin="anonymous"></script>
-  </head>
-  <body>
+    <!-- FontAwesome -->
+    <script src="https://kit.fontawesome.com/69d8b1cf3c.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <!-- DDM Brand -->
@@ -93,9 +101,28 @@ $statementRetrieval->closeCursor();
 
                         <div class="dropdown-divider"></div>
 
-                        <a class="dropdown-item  disabled" href="#">Order History</a>
+                        <a class="dropdown-item" href="CustomerReceipts.php">Order History</a>
 
                         <div class="dropdown-divider"></div>
+
+                        <?php
+                        if (isset($_SESSION['userType'])) {
+                            // If the user is logged in and is a manager, display appropriate admin links
+                            if ($_SESSION['userType'] == "manager") {
+                                echo '<a class="dropdown-item" href="addProductForm.php">Add New Product</a>
+                                <div class="dropdown-divider"></div>';
+
+                                echo' <a class="dropdown-item" href="productListing.php">Update Inventory / Delete Product</a>
+                                <div class="dropdown-divider"></div>';
+
+                                echo' <a class="dropdown-item disabled" href="#">View/Edit Users</a>
+                                <div class="dropdown-divider"></div>';
+                            } elseif ($_SESSION['userType'] == "employee") {
+                                // If the user is logged in and is an employee, display appropriate admin links
+                                echo '<a class="dropdown-item" href="empProductListing.php">View Inventory</a>
+                                <div class="dropdown-divider"></div>';
+                            }
+                        }?>
 
                         <a class="dropdown-item " href="logout.php">Log Out</a>
                     </div>
@@ -127,11 +154,24 @@ $statementRetrieval->closeCursor();
         </div>
     </div>
     <div class="container">
-    <form action="updateStock.php" method="post">
-      Enter the amount you wish to update for product <?php echo $product['productName']; ?>: <input type="text" name="stock" value="<?php echo $product['numInStock']; ?>">
-      <input type="submit" value="Update stock" class="btn btn-success">
-      <input type="hidden" name="product_id" value="<?php echo $product['productNumber']; ?>">
-    </form>
+        <form action="updateStock.php" method="post">
+            Enter the amount you wish to update for product <?php echo $product['productName']; ?>:
+            <input type="text" name="stock"
+                value="<?php echo $product['numInStock']; ?>">
+            <input type="submit" value="Update stock" class="btn btn-success">
+            <input type="hidden" name="product_id"
+                value="<?php echo $product['productNumber']; ?>">
+        </form>
+    <!-- Bootstrap: jQuery, ajax & JavaScript Bundle CDNs -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+    </script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+    </script>
+</body>
 
-  </body>
 </html>

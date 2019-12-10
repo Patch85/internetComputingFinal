@@ -106,9 +106,28 @@
 
                         <div class="dropdown-divider"></div>
 
-                        <a class="dropdown-item  disabled" href="#">Order History</a>
+                        <a class="dropdown-item" href="CustomerReceipts.php">Order History</a>
 
                         <div class="dropdown-divider"></div>
+
+                        <?php
+                        if (isset($_SESSION['userType'])) {
+                            // If the user is logged in and is a manager, display appropriate admin links
+                            if ($_SESSION['userType'] == "manager") {
+                                echo '<a class="dropdown-item" href="addProductForm.php">Add New Product</a>
+                                <div class="dropdown-divider"></div>';
+
+                                echo' <a class="dropdown-item" href="productListing.php">Update Inventory / Delete Product</a>
+                                <div class="dropdown-divider"></div>';
+
+                                echo' <a class="dropdown-item disabled" href="#">View/Edit Users</a>
+                                <div class="dropdown-divider"></div>';
+                            } elseif ($_SESSION['userType'] == "employee") {
+                                // If the user is logged in and is an employee, display appropriate admin links
+                                echo '<a class="dropdown-item" href="empProductListing.php">View Inventory</a>
+                                <div class="dropdown-divider"></div>';
+                            }
+                        }?>
 
                         <a class="dropdown-item " href="logout.php">Log Out</a>
                     </div>
@@ -152,39 +171,41 @@
 
             <!-- For each product in the Cart with >=1 qty, display a row -->
             <tbody>
-                <?php foreach ($_SESSION['cart'] as $item) {                    
-                    if ($item['quantity'] > 0) { ++$itemCount;  ?>                        
-                        <tr>
-                            <th scope="row"> <?php echo $itemCount; ?>
-                            </th>
-                            <td><?php echo $item['productName']; ?>
-                            </td>
-                            <td><em>$<?php echo number_format($item['price'], 2); ?></em>
-                            </td>
+                <?php foreach ($_SESSION['cart'] as $item) {
+    if ($item['quantity'] > 0) {
+        ++$itemCount; ?>
+                <tr>
+                    <th scope="row"> <?php echo $itemCount; ?>
+                    </th>
+                    <td><?php echo $item['productName']; ?>
+                    </td>
+                    <td><em>$<?php echo number_format($item['price'], 2); ?></em>
+                    </td>
 
-                            <td>
-                                <form action="viewCart.php" method="post">
-                                    <div class="input-group">
-                                        <input type="number"
-                                            name="<?php echo $item['productName']; ?>"
-                                            id="<?php echo $item['productName']; ?>"
-                                            value="<?php echo $item['quantity']; ?>"
-                                            class="form-control qtyInput" required>
-                                        <div class="input-group-append">
-                                            <button type="submit" class="btn btn-primary"><i class="fas fa-sync"></i></button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </td>
-                        </tr>
-                    <?php }
-                    $cartTotal = floatval($cartTotal) + (floatval($item['price']) * floatval($item['quantity']));
-                } ?>
+                    <td>
+                        <form action="viewCart.php" method="post">
+                            <div class="input-group">
+                                <input type="number"
+                                    name="<?php echo $item['productName']; ?>"
+                                    id="<?php echo $item['productName']; ?>"
+                                    value="<?php echo $item['quantity']; ?>"
+                                    class="form-control qtyInput" required>
+                                <div class="input-group-append">
+                                    <button type="submit" class="btn btn-primary"><i class="fas fa-sync"></i></button>
+                                </div>
+                            </div>
+                        </form>
+                    </td>
+                </tr>
+                <?php
+    }
+    $cartTotal = floatval($cartTotal) + (floatval($item['price']) * floatval($item['quantity']));
+} ?>
             </tbody>
         </table>
         <p class="mt-2"><em><strong>Cart Total = $<?php echo $cartTotal ?></strong></em></p>
 
-        <a href="confirmCart.php" class="btn btn-success">Confirm Order Details</a>
+        <a href="confirmCart.php" class="btn btn-success">Continue to Checkout</a>
 
     </div>
 

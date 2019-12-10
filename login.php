@@ -95,16 +95,18 @@
                 <li class="nav-item">
                     <a class="nav-link" href="products.php" tabindex="-1">Products</a>
                 </li>
-                
+
                 <li class="nav-item">
                     <a class="nav-link" href="viewCart.php">Shopping Cart</a>
                 </li>
 
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account</a>
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account</a>
 
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">                        
-                        <a class="dropdown-item active" href="login.php">Log In<span class="sr-only">(current)</span></a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item active" href="login.php">Log In<span
+                                class="sr-only">(current)</span></a>
 
                         <div class="dropdown-divider"></div>
 
@@ -120,9 +122,28 @@
 
                         <div class="dropdown-divider"></div>
 
-                        <a class="dropdown-item  disabled" href="#">Order History</a>
+                        <a class="dropdown-item" href="CustomerReceipts.php">Order History</a>
 
                         <div class="dropdown-divider"></div>
+
+                        <?php
+                        if (isset($_SESSION['userType'])) {
+                            // If the user is logged in and is a manager, display appropriate admin links
+                            if ($_SESSION['userType'] == "manager") {
+                                echo '<a class="dropdown-item" href="addProductForm.php">Add New Product</a>
+                                <div class="dropdown-divider"></div>';
+
+                                echo' <a class="dropdown-item" href="productListing.php">Update Inventory / Delete Product</a>
+                                <div class="dropdown-divider"></div>';
+
+                                echo' <a class="dropdown-item disabled" href="#">View/Edit Users</a>
+                                <div class="dropdown-divider"></div>';
+                            } elseif ($_SESSION['userType'] == "employee") {
+                                // If the user is logged in and is an employee, display appropriate admin links
+                                echo '<a class="dropdown-item" href="empProductListing.php">View Inventory</a>
+                                <div class="dropdown-divider"></div>';
+                            }
+                        }?>
 
                         <a class="dropdown-item " href="logout.php">Log Out</a>
                     </div>
@@ -133,7 +154,7 @@
             <form class="form-inline my-2 my-lg-0" action="searchResults.php" method="post">
                 <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"
                     name="SearchQuery">
-                
+
                 <select class="form-control mr-sm-2" name="categoryInput">
                     <option value="productName">Product Name</option>
                     <option value="category">Category</option>
@@ -169,9 +190,10 @@
 
             <button type="submit" class="btn btn-primary">Log In</button>
             <a href="register.php">Not a member yet? Click here to register!</a>
-            <p> <br><?php echo $tellTheUser;?></p>
+            <p> <br><?php echo $tellTheUser;?>
+            </p>
         </form>
-        
+
     </div>
 
 

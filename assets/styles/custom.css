@@ -1,6 +1,6 @@
 .musicJumbotron {
 	/* Hit Unsplash's Source API for a random background image, using the keyword 'music' */
-	background-image: url("https://source.unsplash.com/featured/?music");
+	background-image: url("https://source.unsplash.com/featured/?music, instrument");
 	background-size: cover;
 }
 

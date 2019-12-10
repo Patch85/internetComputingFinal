@@ -41,8 +41,8 @@
     <!-- Provide Nav links in a List  -->
     <div class="collapse navbar-collapse" id="navLinks">
       <ul class="navbar-nav mr-auto">
-        <li class="nav-item active">
-          <a class="nav-link" href="index.php">Home <span class="sr-only">(current)</span></a>
+        <li class="nav-item ">
+          <a class="nav-link" href="index.php">Home</a>
         </li>
 
         <li class="nav-item">
@@ -74,9 +74,28 @@
 
             <div class="dropdown-divider"></div>
 
-            <a class="dropdown-item  disabled" href="#">Order History</a>
+            <a class="dropdown-item" href="CustomerReceipts.php">Order History</a>
 
             <div class="dropdown-divider"></div>
+
+            <?php
+                        if (isset($_SESSION['userType'])) {
+                            // If the user is logged in and is a manager, display appropriate admin links
+                            if ($_SESSION['userType'] == "manager") {
+                                echo '<a class="dropdown-item active" href="addProductForm.php">Add New Product<span class="sr-only">(current)</span></a>
+                                <div class="dropdown-divider"></div>';
+
+                                echo' <a class="dropdown-item" href="productListing.php">Update Inventory / Delete Product</a>
+                                <div class="dropdown-divider"></div>';
+
+                                echo' <a class="dropdown-item disabled" href="#">View/Edit Users</a>
+                                <div class="dropdown-divider"></div>';
+                            } elseif ($_SESSION['userType'] == "employee") {
+                                // If the user is logged in and is an employee, display appropriate admin links
+                                echo '<a class="dropdown-item" href="empProductListing.php">View Inventory</a>
+                                <div class="dropdown-divider"></div>';
+                            }
+                        }?>
 
             <a class="dropdown-item " href="logout.php">Log Out</a>
           </div>
@@ -109,6 +128,7 @@
 
   <!-- Main Section of the page: Show 6 Featured Products as cards with brief descriptions -->
   <div class="container">
+
     <form class="col-md-6 m-auto" action="addProduct.php" method="post">
 
       <div class="form-group">
@@ -145,20 +165,19 @@
 
       <div class="form-group">
         <label for="price">Price</label>
-        <input type="number" class="form-control" name="price" id="price" placeholder="$754.99" required>
+        <input type="text" class="form-control" name="price" id="price" placeholder="754.99" required>
       </div>
 
       <div class="form-group">
         <label for="description">Description</label>
-        <textarea class="form-control" name="descripton" id="description" cols="30" rows="10" required></textarea>
+        <textarea class="form-control" name="description" id="description" required></textarea>
       </div>
 
       <div class="form-group">
         <label for="imagePath">Image filename</label>
-        <input type="text" class="form-control" name="imagePath" id="imagePath" placeholder="fenderStrat.png" required>
+        <input type="text" class="form-control" name="imagePath" id="imagePath" placeholder="strat.jpg" required>
       </div>
       <input type="submit" class="btn btn-success" value="Add product">
-      <a href="productListing.php" class="btn btn-danger ml-4">Delete product</a>
     </form>
 
 
