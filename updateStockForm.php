@@ -132,7 +132,7 @@
             <!-- Allow searching for products from the navbar -->
             <form class="form-inline my-2 my-lg-0" action="searchResults.php" method="post">
                 <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"
-                    name="SearchQuery">
+                    name="searchQuery">
 
                 <select class="form-control mr-sm-2" name="categoryInput">
                     <option value="productName">Product Name</option>

@@ -1,30 +1,30 @@
 <?php
-    // Start a session
-    $lifetime = 60 * 60 * 6; // 6 hours in seconds
-    session_start();
+// Start a session
+$lifetime = 60 * 60 * 6; // 6 hours in seconds
+session_start();
 
-    // Create a mulitdimensional array to hold shopping cart data
-    if (!isset($_SESSION['cart'])) {
-        $_SESSION['cart']  = array();
-    }
-    $cartTotal = 0.00;
-    $itemCount = 0;
+// Create a mulitdimensional array to hold shopping cart data
+if (!isset($_SESSION['cart'])) {
+    $_SESSION['cart']  = array();
+}
+$cartTotal = 0.00;
+$itemCount = 0;
 
-    // Set PDO variables
-    $dsn = 'mysql:host=localhost;dbname=music';
-    // musicman has global privileges for the music database
-    // make sure to create and use a more limited user for customer access
-    $dbUsername = 'musicman';
-    $dbPassword = 'bQC_2AFWpq46M4N';
+// Set PDO variables
+$dsn = 'mysql:host=localhost;dbname=music';
+// musicman has global privileges for the music database
+// make sure to create and use a more limited user for customer access
+$dbUsername = 'musicman';
+$dbPassword = 'bQC_2AFWpq46M4N';
 
-    //  Attempt to connect to the database
-    try {
-        $db = new PDO($dsn, $dbUsername, $dbPassword);
-    } catch (PDOException $e) {
-        $error_message = $e->getMessage();
-        echo " <p>An error occurred while connecting to the database: $error_message</p>";
-        die();
-    }
+//  Attempt to connect to the database
+try {
+    $db = new PDO($dsn, $dbUsername, $dbPassword);
+} catch (PDOException $e) {
+    $error_message = $e->getMessage();
+    echo " <p>An error occurred while connecting to the database: $error_message</p>";
+    die();
+}
 ?>
 
 <!DOCTYPE html>
@@ -38,8 +38,7 @@
     <title>DDM, Inc. Music Shop</title>
 
     <!-- Bootstrap CSS CDN -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
     <!-- Add the custom CSS on top of Bootstrap -->
     <link rel="stylesheet" href="assets\styles\custom.css">
@@ -55,8 +54,7 @@
         <!-- DDM Brand -->
         <a class="navbar-brand" href="index.php">DDM, Inc.</a>
         <!-- Use Bootstrap's Toggler to allow for expanding from and collapsing to a hamburger menu -->
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navLinks"
-            aria-controls="navLinks" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navLinks" aria-controls="navLinks" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <!-- Provide Nav links in a List  -->
@@ -75,8 +73,7 @@
                 </li>
 
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account</a>
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account</a>
 
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item " href="login.php">Log In</a>
@@ -104,17 +101,17 @@
                                 echo '<a class="dropdown-item" href="addProductForm.php">Add New Product</a>
                                 <div class="dropdown-divider"></div>';
 
-                                echo' <a class="dropdown-item" href="productListing.php">Update Inventory / Delete Product</a>
+                                echo ' <a class="dropdown-item" href="productListing.php">Update Inventory / Delete Product</a>
                                 <div class="dropdown-divider"></div>';
 
-                                echo' <a class="dropdown-item disabled" href="#">View/Edit Users</a>
+                                echo ' <a class="dropdown-item disabled" href="#">View/Edit Users</a>
                                 <div class="dropdown-divider"></div>';
                             } elseif ($_SESSION['userType'] == "employee") {
                                 // If the user is logged in and is an employee, display appropriate admin links
                                 echo '<a class="dropdown-item" href="empProductListing.php">View Inventory</a>
                                 <div class="dropdown-divider"></div>';
                             }
-                        }?>
+                        } ?>
 
                         <div class="dropdown-divider"></div>
 
@@ -125,8 +122,7 @@
 
             <!-- Allow searching for products from the navbar -->
             <form class="form-inline my-2 my-lg-0" action="searchResults.php" method="post">
-                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"
-                    name="SearchQuery">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="searchQuery">
 
                 <select class="form-control mr-sm-2" name="categoryInput">
                     <option value="productName">Product Name</option>
@@ -160,25 +156,25 @@
             <!-- For each product in the Cart, display a row -->
             <tbody>
                 <?php foreach ($_SESSION['cart'] as $item) {
-    if ($item['quantity'] > 0) {
-        ++$itemCount; ?>
-                <tr>
-                    <th scope="row"> <?php echo $itemCount; ?>
-                    </th>
+                    if ($item['quantity'] > 0) {
+                        ++$itemCount; ?>
+                        <tr>
+                            <th scope="row"> <?php echo $itemCount; ?>
+                            </th>
 
-                    <td><?php echo $item['productName']; ?>
-                    </td>
+                            <td><?php echo $item['productName']; ?>
+                            </td>
 
-                    <td><em>$<?php echo number_format($item['price'], 2); ?></em>
-                    </td>
+                            <td><em>$<?php echo number_format($item['price'], 2); ?></em>
+                            </td>
 
-                    <td>
-                        <?php echo $item['quantity']; ?>
-                    </td>
-                </tr>
+                            <td>
+                                <?php echo $item['quantity']; ?>
+                            </td>
+                        </tr>
                 <?php $cartTotal = floatval($cartTotal) + (floatval($item['price']) * floatval($item['quantity']));
-    }
-}?>
+                    }
+                } ?>
             </tbody>
         </table>
         <p class="mt-2"><em><strong>Cart Total = $<?php echo $cartTotal ?></strong></em></p>
@@ -188,14 +184,11 @@
     </div>
 
     <!-- Bootstrap: jQuery, ajax & JavaScript Bundle CDNs -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
     </script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
     </script>
 </body>
 

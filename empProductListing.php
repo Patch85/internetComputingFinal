@@ -1,24 +1,24 @@
 <?php
-    // Start a session
-    session_start();
-    if ($_SESSION['userType'] != "employee") {
-        header("Location: index.php"); //Only employees should see this product view
-    }
+// Start a session
+session_start();
+if ($_SESSION['userType'] != "employee") {
+    header("Location: index.php"); //Only employees should see this product view
+}
 
-    // Set initial variables
-    $dsn = 'mysql:host=localhost;dbname=music';
-    // musicman has global privileges for the music database
-    // make sure to create and use a more limited user for customer access
-    $dbUsername = 'musicman';
-    $dbPassword = 'bQC_2AFWpq46M4N';
-    //  Attempt to connect to the database
-    try {
-        $db = new PDO($dsn, $dbUsername, $dbPassword);
-    } catch (PDOException $e) {
-        $error_message = $e->getMessage();
-        echo " <p>An error occurred while connecting to the database: $error_message</p>";
-        die();
-    }
+// Set initial variables
+$dsn = 'mysql:host=localhost;dbname=music';
+// musicman has global privileges for the music database
+// make sure to create and use a more limited user for customer access
+$dbUsername = 'musicman';
+$dbPassword = 'bQC_2AFWpq46M4N';
+//  Attempt to connect to the database
+try {
+    $db = new PDO($dsn, $dbUsername, $dbPassword);
+} catch (PDOException $e) {
+    $error_message = $e->getMessage();
+    echo " <p>An error occurred while connecting to the database: $error_message</p>";
+    die();
+}
 
 
 if (!empty($category)) {
@@ -52,8 +52,7 @@ if (!empty($category)) {
     <title>DDM, Inc. Music Shop</title>
 
     <!-- Bootstrap CSS CDN -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
 
     <!-- Add the custom CSS on top of Bootstrap -->
@@ -69,8 +68,7 @@ if (!empty($category)) {
         <!-- DDM Brand -->
         <a class="navbar-brand" href="index.php">DDM, Inc.</a>
         <!-- Use Bootstrap's Toggler to allow for expanding from and collapsing to a hamburger menu -->
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navLinks"
-            aria-controls="navLinks" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navLinks" aria-controls="navLinks" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <!-- Provide Nav links in a List  -->
@@ -89,8 +87,7 @@ if (!empty($category)) {
                 </li>
 
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account</a>
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account</a>
 
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item " href="login.php">Log In</a>
@@ -120,27 +117,25 @@ if (!empty($category)) {
                                 echo '<a class="dropdown-item" href="addProductForm.php">Add New Product</a>
                                 <div class="dropdown-divider"></div>';
 
-                                echo' <a class="dropdown-item" href="productListing.php">Update Inventory / Delete Product</a>
+                                echo ' <a class="dropdown-item" href="productListing.php">Update Inventory / Delete Product</a>
                                 <div class="dropdown-divider"></div>';
 
-                                echo' <a class="dropdown-item disabled" href="#">View/Edit Users</a>
+                                echo ' <a class="dropdown-item disabled" href="#">View/Edit Users</a>
                                 <div class="dropdown-divider"></div>';
                             } elseif ($_SESSION['userType'] == "employee") {
                                 // If the user is logged in and is an employee, display appropriate admin links
                                 echo '<a class="dropdown-item active" href="empProductListing.php">View Inventory<span class="sr-only">(current)</span></a>
                                 <div class="dropdown-divider"></div>';
                             }
-                        }?>
+                        } ?>
 
                         <a class="dropdown-item " href="logout.php">Log Out</a>
                     </div>
                 </li>
             </ul>
-
             <!-- Allow searching for products from the navbar -->
             <form class="form-inline my-2 my-lg-0" action="searchResults.php" method="post">
-                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"
-                    name="SearchQuery">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="searchQuery">
 
                 <select class="form-control mr-sm-2" name="categoryInput">
                     <option value="productName">Product Name</option>
@@ -159,7 +154,7 @@ if (!empty($category)) {
         <div class="container">
             <h1 class="jumboHeading">Admin: Inventory</h1>
             <h2 class="jumboTagline">
-                <h2 class="jumboTagline"><?php echo $_SESSION['userName'].": ".$_SESSION['userType']; ?>
+                <h2 class="jumboTagline"><?php echo $_SESSION['userName'] . ": " . $_SESSION['userType']; ?>
                     View</h2>
         </div>
     </div>
@@ -187,28 +182,25 @@ if (!empty($category)) {
                 <th># In Stock</th>
             </tr>
             <?php foreach ($products as $product) { ?>
-            <tr>
-                <td><?php echo $product['productNumber']; ?>
-                </td>
-                <td><?php echo $product['productName']; ?>
-                </td>
-                <td><?php echo $product['price']; ?>
-                </td>
-                <td><?php echo $product['numInStock'];?></td>
+                <tr>
+                    <td><?php echo $product['productNumber']; ?>
+                    </td>
+                    <td><?php echo $product['productName']; ?>
+                    </td>
+                    <td><?php echo $product['price']; ?>
+                    </td>
+                    <td><?php echo $product['numInStock']; ?></td>
 
-            </tr>
+                </tr>
             <?php } ?>
         </table>
 
         <!-- Bootstrap: jQuery, ajax & JavaScript Bundle CDNs -->
-        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
         </script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
         </script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
         </script>
 </body>
 
